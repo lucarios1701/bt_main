@@ -1219,6 +1219,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             sargs = self.datas + list(sargs)
             try:
                 # @tuando: dont understand why sargs with self.datas added to this
+                # @tuando: solved - the data added to sargs will be add to 'args' in 'MetaLineIterator' and appended to _obj.datas of MetaLine
                 strat = stratcls(*sargs, **skwargs)
             except bt.errors.StrategySkipError:
                 continue  # do not add strategy to the mix
@@ -1699,7 +1700,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             self._check_timers(runstrats, dt0, cheat=False)
 
             for strat in runstrats:
-                strat._oncepost(dt0)
+                strat._oncepost(dt0)  # @tuando: everything is handled here
                 if self._event_stop:  # stop if requested
                     return
 
