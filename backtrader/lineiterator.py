@@ -303,7 +303,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
             observer.forward(size=self.buflen())
 
         for data in self.datas:
-            data.home()
+            data.home()  # @tuando: this will refer data to 'LineBuffer' home(). This will reset the idx of the 'size' to (-1)
 
         for indicator in self._lineiterators[LineIterator.IndType]:
             indicator.home()
