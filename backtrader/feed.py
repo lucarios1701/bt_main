@@ -367,6 +367,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             self.tick_last = getattr(self.lines, alias0)[0]
 
     def advance_peek(self):
+        # @tuando: 'len(self) is the 'lencount' in LineBuffer (guess: counted the data point added to array)
+        # @tuando: this self.buflen() called from self.datas and self.datas already has data so buflen have the lenght of required data
         if len(self) < self.buflen():
             return self.lines.datetime[1]  # return the future
 

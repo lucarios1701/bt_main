@@ -1657,15 +1657,17 @@ class Cerebro(with_metaclass(MetaParams, object)):
         is called for each data arrival
         '''
         for strat in runstrats:
-            strat._once()
-            strat.reset()  # strat called next by next - reset lines
+            strat._once()  # @tuando: reset data 'array'
+            strat.reset()  # strat called next by next - reset lines # @ tuando: also reset 'array' of LineBuffer
 
         # The default once for strategies does nothing and therefore
         # has not moved forward all datas/indicators/observers that
         # were homed before calling once, Hence no "need" to do it
         # here again, because pointers are at 0
+        # @tuando: this self.datas is list() was created for Cerebro to add data in 'adddata'
+
         datas = sorted(self.datas,
-                       key=lambda x: (x._timeframe, x._compression))
+                       key=lambda x: (x._timeframe, x._compression))  # @tuando: this data had data already because of loaded before
 
         while True:
             # Check next incoming date in the datas

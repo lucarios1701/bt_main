@@ -334,7 +334,7 @@ class LineBuffer(LineSingle):
 
         return self.array[start:end]
 
-    def oncebinding(self):
+    def oncebinding(self):  # @tuando: didn't reasearch this yet
         '''
         Executes the bindings when running in "once" mode
         '''

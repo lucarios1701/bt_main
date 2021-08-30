@@ -303,7 +303,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
             observer.forward(size=self.buflen())
 
         for data in self.datas:
-            data.home()  # @tuando: this will refer data to 'LineBuffer' home(). This will reset the idx of the 'size' to (-1)
+            data.home()  # @tuando:(guess: reset data) this will refer data to 'LineBuffer' home(). This will reset the idx of the 'size' to (-1)
 
         for indicator in self._lineiterators[LineIterator.IndType]:
             indicator.home()
@@ -311,7 +311,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         for observer in self._lineiterators[LineIterator.ObsType]:
             observer.home()
 
-        self.home()
+        self.home()  # @tuando: 'LineBuffer' Guess: reset LineBuffer of strategy (e.g self.idx = -1)
 
         # These 3 remain empty for a strategy and therefore play no role
         # because a strategy will always be executed on a next basis
