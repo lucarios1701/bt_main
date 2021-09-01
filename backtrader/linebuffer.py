@@ -283,7 +283,7 @@ class LineBuffer(LineSingle):
         Keyword Args:
             size (int): How many extra positions to move forward
         '''
-        self.idx += size
+        self.idx += size  # @tuando: because the idx is reseted in '.home()' when runstrategies, so this advance will start 'idx' over again
         self.lencount += size
 
     def extend(self, value=NAN, size=0):

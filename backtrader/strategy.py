@@ -301,6 +301,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # strategy has been reset to beginning. advance step by step
             self.forward()
 
+        # @tuando: Guess - self.lines of datas and self.lines of strategies are difference
         self.lines.datetime[0] = dt
         self._notify()
 

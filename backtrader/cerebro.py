@@ -1657,7 +1657,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         is called for each data arrival
         '''
         for strat in runstrats:
-            strat._once()  # @tuando: reset data 'array'
+            strat._once()  # @tuando: when call this, the 'idx' in LinBuffer of datas will be reseted
             strat.reset()  # strat called next by next - reset lines # @ tuando: also reset 'array' of LineBuffer
 
         # The default once for strategies does nothing and therefore
@@ -1671,6 +1671,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         while True:
             # Check next incoming date in the datas
+            # @tuando: if 1 data feed so 1 will be returned
+            # TUANDO: NEED TO RE-CHECK WHEN USING MULTIPLE DATA FEED
             dts = [d.advance_peek() for d in datas]
             dt0 = min(dts)
             if dt0 == float('inf'):

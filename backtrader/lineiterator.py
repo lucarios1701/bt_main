@@ -292,8 +292,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
 
     def _once(self):
         # @tuando: the size of 'forward' is the data points that will be added to 'array' in 'linebuffer'
-        # @tuando: guess: this forward will loop over again to created array with lenght of all data, only for 'Strategy'
         # @tuando: guess: because this 'function' is called when 'strat' is initiated, so forward will created an empty array with required lenght
+        # @tuando: this will save the data lenght we need
         self.forward(size=self._clock.buflen())
 
         for indicator in self._lineiterators[LineIterator.IndType]:
