@@ -267,6 +267,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def _getminperstatus(self):
         # check the min period status connected to datas
+        # @tuando: I dont understand why we must subtract here yet
         dlens = map(operator.sub, self._minperiods, map(len, self.datas))
         self._minperstatus = minperstatus = max(dlens)
         return minperstatus
