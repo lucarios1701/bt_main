@@ -25,8 +25,9 @@ class TestStrategy(bt.Strategy):
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        # self.log('Close, %.2f' % self.dataclose[0])
-        pass
+        self.log('Close, %.2f' % self.dataclose[0])
+        # pass
+        # @tuando: because the idx of array has been reseted so the loop will read data again```
 
 
 if __name__ == '__main__':

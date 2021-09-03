@@ -268,6 +268,9 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def _getminperstatus(self):
         # check the min period status connected to datas
         # @tuando: I dont understand why we must subtract here yet
+        # @tuando: self.datas will increase because datas are being 'advance()' before in cerebro
+        # @tuando: because of calling 'advance()' first so the lenght of 1st datas will be 1
+        # @tuando: guess - this minus only be used for the purpose of calling 'next()' function in '_onepost'
         dlens = map(operator.sub, self._minperiods, map(len, self.datas))
         self._minperstatus = minperstatus = max(dlens)
         return minperstatus
@@ -302,12 +305,12 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # strategy has been reset to beginning. advance step by step
             self.forward()
 
-        # @tuando: Guess - self.lines of datas and self.lines of strategies are difference
+        # @tuando: Guess - self.lines of datas and self.lines of strategies are difference so this will refer datetime to datetime of strategy class
         self.lines.datetime[0] = dt
         self._notify()
 
         minperstatus = self._getminperstatus()
-        if minperstatus < 0:
+        if minperstatus < 0:  # @tuando: guess: minperstatus will < 0 means there still have data to loop next
             self.next()
         elif minperstatus == 0:
             self.nextstart()  # only called for the 1st value

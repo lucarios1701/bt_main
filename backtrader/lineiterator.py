@@ -294,6 +294,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         # @tuando: the size of 'forward' is the data points that will be added to 'array' in 'linebuffer'
         # @tuando: guess: because this 'function' is called when 'strat' is initiated, so forward will created an empty array with required lenght
         # @tuando: this will save the data lenght we need
+        # @tuando: - guess this will forward for strats class
         self.forward(size=self._clock.buflen())
 
         for indicator in self._lineiterators[LineIterator.IndType]:
@@ -302,8 +303,10 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         for observer in self._lineiterators[LineIterator.ObsType]:
             observer.forward(size=self.buflen())
 
-        for data in self.datas:
+        for data in self.datas:  # This is 'datas' of strategy class was added when call 'strat' in cerebro
             data.home()  # @tuando:(guess: reset data) this will refer data to 'LineBuffer' home(). This will reset the idx of the 'size' to (-1)
+            # @tuando: guess - this will take data to home() in LineBuffer. This data already has data
+            # @tuando: guess - this take data to 'home()' means take the idx to home. But it still has data inside
 
         for indicator in self._lineiterators[LineIterator.IndType]:
             indicator.home()
