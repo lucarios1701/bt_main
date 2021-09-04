@@ -28,6 +28,7 @@ class TestStrategy(bt.Strategy):
         self.log('Close, %.2f' % self.dataclose[0])
         # pass
         # @tuando: because the idx of array has been reseted so the loop will read data again```
+        # @tuando: the loop of line buffer is tracking by 'self.idx', the data called is follow (self.idx)
 
 
 if __name__ == '__main__':
