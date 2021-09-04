@@ -40,7 +40,9 @@ def findbases(kls, topclass):
 
 
 def findowner(owned, cls, startlevel=2, skip=None):
+    # @tuando: this will find the class which was called is the instance of cls and return that class
     # skip this frame and the caller's -> start at 2
+    # @tuando: start from 2 because the first frame is 'findowner' and the second is where the 'findowner' is called
     for framelevel in itertools.count(startlevel):
         try:
             frame = sys._getframe(framelevel)

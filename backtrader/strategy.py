@@ -931,6 +931,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
+        # if dataname is not passed, so that mean this will buy the first data
         data = data if data is not None else self.datas[0]
         size = size if size is not None else self.getsizing(data, isbuy=True)
 

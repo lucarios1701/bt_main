@@ -758,6 +758,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         data.setenvironment(self)
 
         self.datas.append(data)
+        # @tuando: if the name was not given, so the datapath will be splitted  and refered to _name
         self.datasbyname[data._name] = data
         feed = data.getfeed()
         if feed and feed not in self.feeds:

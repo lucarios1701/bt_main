@@ -1,7 +1,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
-import datetime  # For datetime objects
+import datetime
+from os import name  # For datetime objects
 import os.path  # To manage paths
 import sys  # To find out the script name (in argv[0])
 
@@ -25,8 +26,8 @@ class TestStrategy(bt.Strategy):
 
     def next(self):
         # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
-        # pass
+        # self.log('Close, %.2f' % self.dataclose[0])
+        pass
         # @tuando: because the idx of array has been reseted so the loop will read data again```
         # @tuando: the loop of line buffer is tracking by 'self.idx', the data called is follow (self.idx)
 
