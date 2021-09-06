@@ -57,7 +57,7 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
 
     def init(self):
         # called from init and from start
-        if None not in self.comminfo:
+        if None not in self.comminfo:  # @tuando: if specific data's commission is not given, the default comm will be returned
             self.comminfo = dict({None: self.p.commission})
 
     def start(self):
@@ -88,7 +88,6 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
                       interest=0.0, interest_long=False, leverage=1.0,
                       automargin=False,
                       name=None):
-
         '''This method sets a `` CommissionInfo`` object for assets managed in
         the broker with the parameters. Consult the reference for
         ``CommInfoBase``
