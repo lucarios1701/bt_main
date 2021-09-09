@@ -221,7 +221,7 @@ class OrderData(object):
 
 class OrderBase(with_metaclass(MetaParams, object)):
     params = (
-        ('owner', None), ('data', None),
+        ('owner', None),  ('data', None),
         ('size', None), ('price', None), ('pricelimit', None),
         ('exectype', None), ('valid', None), ('tradeid', 0), ('oco', None),
         ('trailamount', None), ('trailpercent', None),
@@ -300,6 +300,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
         return '\n'.join(tojoin)
 
     def __init__(self):
+        # @tuando: this 'ref' will saved the number of Buy orders were created
         self.ref = next(self.refbasis)
         self.broker = None
         self.info = AutoOrderedDict()
@@ -315,10 +316,12 @@ class OrderBase(with_metaclass(MetaParams, object)):
             self.exectype = Order.Market
 
         if not self.isbuy():
-            self.size = -self.size
+            self.size = -self.size  # @tuando: guess - this will distinguish between Buy/Sell
 
         # Set a reference price if price is not set using
         # the close price
+        # @tuando: data was passed from bbroker with the trick pass kwargs's values to 'params' value had same name
+        # @tuando: beacause we are in the next() loop so the data return will be similiar with value of next() loop
         pclose = self.data.close[0] if not self.simulated else self.price
         if not self.price and not self.pricelimit:
             price = pclose
@@ -504,7 +507,6 @@ class OrderBase(with_metaclass(MetaParams, object)):
                 opened, openedvalue, openedcomm,
                 margin, pnl,
                 psize, pprice):
-
         '''Receives data execution input and stores it'''
         if not size:
             return
@@ -618,6 +620,7 @@ class Order(OrderBase):
 
 
 class BuyOrder(Order):
+    # @tuando: this ordtype will save the ordertype is Buy or Sell in the order base
     ordtype = Order.Buy
 
 
