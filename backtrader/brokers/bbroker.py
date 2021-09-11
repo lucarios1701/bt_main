@@ -652,6 +652,7 @@ class BackBroker(bt.BrokerBase):
             histnotify=False, _checksubmit=True,
             **kwargs):
 
+        # @tuando - guess: order will save the order information to be submited
         order = BuyOrder(owner=owner, data=data,
                          size=size, price=price, pricelimit=plimit,
                          exectype=exectype, valid=valid, tradeid=tradeid,
