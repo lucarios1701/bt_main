@@ -456,7 +456,7 @@ class OrderBase(with_metaclass(MetaParams, object)):
     def submit(self, broker=None):
         '''Marks an order as submitted and stores the broker to which it was
         submitted'''
-        self.status = Order.Submitted
+        self.status = Order.Submitted  # @tuando: 'status' to keep track where the 'order' is going
         self.broker = broker
         self.plen = len(self.data)
 

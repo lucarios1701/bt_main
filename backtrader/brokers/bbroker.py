@@ -547,6 +547,7 @@ class BackBroker(bt.BrokerBase):
     def transmit(self, order, check=True):
         if check and self.p.checksubmit:
             order.submit()
+            # @tuando: guess 'self.submitted' to keep track which orders are submited
             self.submitted.append(order)
             self.orders.append(order)
             self.notify(order)
