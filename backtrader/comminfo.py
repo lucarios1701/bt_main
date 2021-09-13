@@ -233,6 +233,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
         if self._commtype == self.COMM_PERC:
             return abs(size) * self.p.commission * price
 
+        # @tuando: if not stock, the commission will be fixed
         return abs(size) * self.p.commission
 
     def getcommission(self, size, price):

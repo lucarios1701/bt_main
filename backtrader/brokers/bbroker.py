@@ -568,6 +568,7 @@ class BackBroker(bt.BrokerBase):
 
             comminfo = self.getcommissioninfo(order.data)
 
+            # @tuando - guess: self.positions is Position class save the position info to execute
             position = positions.setdefault(
                 order.data, self.positions[order.data].clone())
 
@@ -727,6 +728,7 @@ class BackBroker(bt.BrokerBase):
         else:
             pnl = 0
             if not self.p.coo:
+                # @tuando: when 'coo' is false means execute price at closed of t+0, which was set in order - init()
                 price = pprice_orig = order.created.price
             else:
                 # When doing cheat on open, the price to be considered for a
@@ -779,9 +781,11 @@ class BackBroker(bt.BrokerBase):
             if openedvalue > 0:  # long position being opened
                 opencash /= comminfo.get_leverage()  # dec cash with level
 
+            # @tuando: this will minus the amount needed for buy asset
             cash -= opencash  # original behavior
 
             openedcomm = cinfocomp.getcommission(opened, price)
+            # @tuando: this minus the amount of commission
             cash -= openedcomm
 
             if cash < 0.0:
@@ -818,6 +822,7 @@ class BackBroker(bt.BrokerBase):
 
         if execsize:
             # Confimrm the operation to the comminfo object
+            # @tuando - guess: i think this confirm havent used yet
             comminfo.confirmexec(execsize, price)
 
             # do a real position update if something was executed

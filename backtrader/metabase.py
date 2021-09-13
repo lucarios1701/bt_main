@@ -288,6 +288,7 @@ class MetaParams(MetaBase):
         # Create params and set the values from the kwargs
         params = cls.params()
         for pname, pdef in cls.params._getitems():
+            # @tuando: this will set the attribute values from kwarg with the same name to that's name in 'params'
             setattr(params, pname, kwargs.pop(pname, pdef))
 
         # Create the object and set the params in place

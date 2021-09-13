@@ -54,7 +54,7 @@ class Position(object):
         self.size = size
         if size:
             self.price = self.price_orig = price
-        else:
+        else:  # @tuando: because default of 'size' is 0 equal 'False'
             self.price = 0.0
 
         self.adjbase = None
@@ -159,30 +159,34 @@ class Position(object):
             because they refer to a part of the "size" argument
         '''
         self.datetime = dt  # record datetime update (datetime.datetime)
+        print(self.datetime, 'xxxxxxxxx')
 
         self.price_orig = self.price
         oldsize = self.size
         self.size += size
 
-        if not self.size:
+        if not self.size:  # @tuando - guess: this means self.size = size = 0, or self.size += size = 0, so size of close = size and reset the rest
             # Update closed existing position
             opened, closed = 0, size
             self.price = 0.0
-        elif not oldsize:
+        elif not oldsize:  # @tuando - guess: this means there are no position was opened, then the size of open = size and update the price
             # Update opened a position from 0
             opened, closed = size, 0
             self.price = price
         elif oldsize > 0:  # existing "long" position updated
 
             if size > 0:  # increased position
-                opened, closed = size, 0
+                opened, closed = size, 0  # @tuando: increasing position so update the open'size
+                # @tuando: this self.price will calculate the avg price of oldsize, save the price and update with the new size
                 self.price = (self.price * oldsize + size * price) / self.size
 
+            # @tuando: we have stock in position therefore no size are order, so it means reduce the size (and size <= 0)
             elif self.size > 0:  # reduced position
                 opened, closed = 0, size
                 # self.price = self.price
 
             else:  # self.size < 0 # reversed position form plus to minus
+                # @tuando - guess: oldsize > 0 but self.size < 0, means short the net off 'size' then close all the oldsize
                 opened, closed = self.size, -oldsize
                 self.price = price
 
@@ -192,6 +196,7 @@ class Position(object):
                 opened, closed = size, 0
                 self.price = (self.price * oldsize + size * price) / self.size
 
+            # @tuando: we have exist short stock, there are no new order, so it means reduce position
             elif self.size < 0:  # reduced position
                 opened, closed = 0, size
                 # self.price = self.price
@@ -203,4 +208,5 @@ class Position(object):
         self.upopened = opened
         self.upclosed = closed
 
+        # @tuando: total size/ new avg price/ new opened or new closed
         return self.size, self.price, opened, closed

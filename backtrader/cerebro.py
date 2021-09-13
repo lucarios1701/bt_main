@@ -1698,7 +1698,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     if self._event_stop:  # stop if requested
                         return
 
-            self._brokernotify()
+            self._brokernotify()  # @tuando: broker is handled here
             if self._event_stop:  # stop if requested
                 return
 
