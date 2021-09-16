@@ -570,9 +570,11 @@ class BackBroker(bt.BrokerBase):
 
             # @tuando - guess: self.positions is Position class save the position info to execute
             position = positions.setdefault(
-                order.data, self.positions[order.data].clone())
+                order.data, self.positions[order.data].clone())  # @tuando: this will also add data to self.postions attr
+            # @tuando - guess: when we call position without parameter, the default one will return
 
             # pseudo-execute the order to get the remaining cash after exec
+            # @tuando - guess: this executed is only used to check the cash enough for real execute or not
             cash = self._execute(order, cash=cash, position=position)
 
             if cash >= 0.0:
@@ -586,8 +588,9 @@ class BackBroker(bt.BrokerBase):
 
     def submit_accept(self, order):
         order.pannotated = None
-        order.submit()
-        order.accept()
+        order.submit()  # @tuando: marks order is accepted
+        order.accept()  # @tuando: marks order is accept
+        # @tuando - guess: when order is accepted then pass to pending for processing after
         self.pending.append(order)
         self.notify(order)
 
@@ -739,6 +742,7 @@ class BackBroker(bt.BrokerBase):
                 else:
                     price = pprice_orig = order.created.price
 
+            # @tuando: the t+0 price
             psize, pprice, opened, closed = position.update(size, price)
 
         # "Closing" totally or partially is possible. Cash may be re-injected
@@ -1047,6 +1051,7 @@ class BackBroker(bt.BrokerBase):
     def _try_exec(self, order):
         data = order.data
 
+        # @tuando: tick_open was hided by 'tick_' + O/H/L/C in data's class, it was created by _tick_nullify() 'feed.py' then advance will call
         popen = getattr(data, 'tick_open', None)
         if popen is None:
             popen = data.open[0]
@@ -1190,10 +1195,13 @@ class BackBroker(bt.BrokerBase):
         # Discount any cash for positions hold
         credit = 0.0
         for data, pos in self.positions.items():
+            # @tuando: 'if pos' mean the position of data was passed, (the default dict dont have key value, the loop will go throught the dict of self.position if it have)
             if pos:
                 comminfo = self.getcommissioninfo(data)
                 dt0 = data.datetime.datetime()
+                # @tuando: this calculate the interest of credit lending when short selling
                 dcredit = comminfo.get_credit_interest(data, pos, dt0)
+                # @tuando: this saves the credit for each data if had, 0.0 if not short selling
                 self.d_credit[data] += dcredit
                 credit += dcredit
                 pos.datetime = dt0  # mark last credit operation

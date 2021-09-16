@@ -61,7 +61,7 @@ class Position(object):
 
         self.upopened = size
         self.upclosed = 0
-        self.set(size, price)
+        # self.set(size, price)
 
         self.updt = None
 
@@ -159,7 +159,6 @@ class Position(object):
             because they refer to a part of the "size" argument
         '''
         self.datetime = dt  # record datetime update (datetime.datetime)
-        print(self.datetime, 'xxxxxxxxx')
 
         self.price_orig = self.price
         oldsize = self.size

@@ -349,7 +349,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         # and the length doesn't change like if a replay is happening or
         # a real-time data feed is in use and 1 minutes bars are being
         # constructed with 5 seconds updates
-        for lalias in self.getlinealiases():
+        for lalias in self.getlinealiases():  # @tuando: 'self.getlinealiases' is the classmethod of Lines class, called by __getattr__ of MetaLineSeries (guess)
             if lalias != 'datetime':
                 setattr(self, 'tick_' + lalias, None)
 

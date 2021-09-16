@@ -255,13 +255,13 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
         return 0.0
 
+    # @tuando: calculate the interest of lending when short selling
     def get_credit_interest(self, data, pos, dt):
         '''Calculates the credit due for short selling or product specific'''
         size, price = pos.size, pos.price
 
         if size > 0 and not self.p.interest_long:
             return 0.0  # long positions not charged
-
         dt0 = dt.date()
         dt1 = pos.datetime.date()
 
