@@ -394,6 +394,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
             else:
                 if ticks:
                     self._tick_fill()
+        # @tuando: buflen is the len of all data following from_date to to_date saved before, len(self) are updated in main next()
         elif len(self) < self.buflen():
             # a resampler may have advance us past the last point
             if ticks:

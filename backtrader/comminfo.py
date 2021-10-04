@@ -244,6 +244,7 @@ class CommInfoBase(with_metaclass(MetaParams)):
     def confirmexec(self, size, price):
         return self._getcommission(size, price, pseudoexec=False)
 
+    # @tuando: if having closed position, the size of closed position will # 0, pnl will be calculated
     def profitandloss(self, size, price, newprice):
         '''Return actual profit and loss a position has'''
         return size * (newprice - price) * self.p.mult

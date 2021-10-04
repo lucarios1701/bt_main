@@ -569,12 +569,14 @@ class BackBroker(bt.BrokerBase):
             comminfo = self.getcommissioninfo(order.data)
 
             # @tuando - guess: self.positions is Position class save the position info to execute
+            # @tuando - the Position.clone() creates a copy of Position class, update this instance doesn't change the original Position
             position = positions.setdefault(
                 order.data, self.positions[order.data].clone())  # @tuando: this will also add data to self.postions attr
             # @tuando - guess: when we call position without parameter, the default one will return
 
             # pseudo-execute the order to get the remaining cash after exec
             # @tuando - guess: this executed is only used to check the cash enough for real execute or not
+            # @tuando: this _execute includes cash and position class
             cash = self._execute(order, cash=cash, position=position)
 
             if cash >= 0.0:
@@ -693,6 +695,7 @@ class BackBroker(bt.BrokerBase):
     def _execute(self, order, ago=None, price=None, cash=None, position=None,
                  dtcoc=None):
         # ago = None is used a flag for pseudo execution
+        # @tuando - guess: if ago is not None means real executed, if it has no price will return nothing
         if ago is not None and price is None:
             return  # no psuedo exec no price - no execution
 
@@ -722,6 +725,8 @@ class BackBroker(bt.BrokerBase):
             position = self.positions[data]
             pprice_orig = position.price
 
+            # @tuando: price is the price updated on (e.g _try_exc_market...)
+            # @tuando - guess: this is pseudoupdate because is update on the new instance not the original Position class
             psize, pprice, opened, closed = position.pseudoupdate(size, price)
 
             # if part/all of a position has been closed, then there has been
@@ -830,6 +835,7 @@ class BackBroker(bt.BrokerBase):
             comminfo.confirmexec(execsize, price)
 
             # do a real position update if something was executed
+            # @tuando: with _try_execute, the position is the original Position class so it updates the original Position class once at the time _try_ex
             position.update(execsize, price, data.datetime.datetime())
 
             if closed and self.p.int2pnl:  # Assign accumulated interest data
@@ -871,9 +877,10 @@ class BackBroker(bt.BrokerBase):
                 return    # can only execute after creation time
 
             dtcoc = None
-            exprice = popen
+            exprice = popen  # @tuando: if we cheat on open the buy price will be the next open price
 
         if order.isbuy():
+            # @tuando: this will calcuate the price if have slippage
             p = self._slip_up(phigh, exprice, doslip=self.p.slip_open)
         else:
             p = self._slip_down(plow, exprice, doslip=self.p.slip_open)
@@ -1068,7 +1075,7 @@ class BackBroker(bt.BrokerBase):
         pcreated = order.created.price
         plimit = order.created.pricelimit
 
-        if order.exectype == Order.Market:
+        if order.exectype == Order.Market:  # @tuando: if exectype = None, it will be Order.market
             self._try_exec_market(order, popen, phigh, plow)
 
         elif order.exectype == Order.Close:
@@ -1190,12 +1197,13 @@ class BackBroker(bt.BrokerBase):
             self._toactivate.popleft().activate()
 
         if self.p.checksubmit:
+            # @tuando - guess: this will check submitted by check the cash balance, if pass the order will be added to pending order an real execute after
             self.check_submitted()
 
         # Discount any cash for positions hold
         credit = 0.0
         for data, pos in self.positions.items():
-            # @tuando: 'if pos' mean the position of data was passed, (the default dict dont have key value, the loop will go throught the dict of self.position if it have)
+            # @tuando: 'if pos' mean the position of data was passed, (the default dict dont have key value, the loop will go throught the dict of self.position if it had)
             if pos:
                 comminfo = self.getcommissioninfo(data)
                 dt0 = data.datetime.datetime()
@@ -1226,6 +1234,7 @@ class BackBroker(bt.BrokerBase):
                 self.pending.append(order)  # cannot yet be processed
 
             else:
+                # @tuando: real execute order
                 self._try_exec(order)
                 if order.alive():
                     self.pending.append(order)

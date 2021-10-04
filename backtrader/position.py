@@ -116,6 +116,7 @@ class Position(object):
     __nonzero__ = __bool__
 
     def clone(self):
+        # @tuando: return Position() creates new instance (or a Copy) of Position class 
         return Position(size=self.size, price=self.price)
 
     def pseudoupdate(self, size, price):
@@ -163,6 +164,7 @@ class Position(object):
         self.price_orig = self.price
         oldsize = self.size
         self.size += size
+        print(self.size, 'xxxx')
 
         if not self.size:  # @tuando - guess: this means self.size = size = 0, or self.size += size = 0, so size of close = size and reset the rest
             # Update closed existing position
