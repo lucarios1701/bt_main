@@ -449,10 +449,12 @@ class BackBroker(bt.BrokerBase):
             if not self.p.shortcash:
                 dvalue = abs(dvalue)  # short selling adds value in this case
 
-            pos_value += dvalue
+            pos_value += dvalue  # @tuando: current portfolio value
+            # @tuando: the unrealized pnl of portfolio compared with the current price
             unrealized += dunrealized
 
             if dvalue > 0:  # long position - unlever
+                # @tuando - guess: substract pnl to recalculating the value of position if has leverage
                 dvalue -= dunrealized
                 pos_value_unlever += (dvalue / comminfo.get_leverage())
                 pos_value_unlever += dunrealized
@@ -803,7 +805,8 @@ class BackBroker(bt.BrokerBase):
                 openedvalue = openedcomm = 0.0
 
             elif ago is not None:  # real execution
-                if abs(psize) > abs(opened):
+                # @tuando: psize > opened when this is not the first position was executed
+                if abs(psize) > abs(opened):  # @tuando - guess: if not future, this hasn't used yet
                     # some futures were opened - adjust the cash of the
                     # previously existing futures to the operation price and
                     # use that as new adjustment base, because it already is
@@ -816,6 +819,7 @@ class BackBroker(bt.BrokerBase):
                                                 position.adjbase, price)
 
                 # record adjust price base for end of bar cash adjustment
+                # @tuando: the first adjbase was saved by the first price of first position
                 position.adjbase = price
 
                 # update system cash - checking if opened is still != 0

@@ -180,6 +180,7 @@ class OrderData(object):
             pnl=0.0,
             psize=0, pprice=0.0):
 
+        # @tuando: save the execution info to OrderExecutionBit
         self.addbit(
             OrderExecutionBit(dt, size, price,
                               closed, closedvalue, closedcomm,
@@ -188,6 +189,7 @@ class OrderData(object):
 
     def addbit(self, exbit):
         # Stores an ExecutionBit and recalculates own values from ExBit
+        # @tuando - guess: exbits saves the execution infor for the purpose of query historical
         self.exbits.append(exbit)
 
         self.remsize -= exbit.size
