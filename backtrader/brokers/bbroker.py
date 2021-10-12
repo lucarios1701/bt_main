@@ -28,6 +28,7 @@ import backtrader as bt
 from backtrader.comminfo import CommInfoBase
 from backtrader.order import Order, BuyOrder, SellOrder
 from backtrader.position import Position
+from backtrader.resamplerfilter import ReplayerMonthly
 from backtrader.utils.py3 import string_types, integer_types
 
 __all__ = ['BackBroker', 'BrokerBack']
@@ -428,7 +429,6 @@ class BackBroker(bt.BrokerBase):
             c = self._cash_addition.popleft()
             self._fundshares += c / self._fundval
             self.cash += c
-
         for data in datas or self.positions:
             comminfo = self.getcommissioninfo(data)
             position = self.positions[data]
@@ -509,6 +509,10 @@ class BackBroker(bt.BrokerBase):
     def getposition(self, data):
         '''Returns the current position status (a ``Position`` instance) for
         the given ``data``'''
+        # print(self.positions[data])
+        # print(self.positions, 'xxxxxxxx')
+        # @tuando: before the return, self.positions doesn't have position of data yet
+        # but it's created when the return 'self.positions[data]' was called by defaultdict
         return self.positions[data]
 
     def orderstatus(self, order):
