@@ -500,7 +500,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
     def set_tradehistory(self, onoff=True):
         self._tradehistoryon = onoff
 
-    def clear(self):
+    def clear(self):  # @tuando -guess: clear orders pending after notifying
         self._orders.extend(self._orderspending)
         self._orderspending = list()
         self._tradespending = list()
@@ -579,6 +579,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if quicknotify:
             self._notify(qorders=qorders, qtrades=qtrades)
 
+    # @tuando: _notify is called at _oncepost, however oncepost is called after _brokernotify which have broker 'next'
     def _notify(self, qorders=[], qtrades=[]):
         if self.cerebro.p.quicknotify:
             # need to know if quicknotify is on, to not reprocess pendingorders
@@ -590,6 +591,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             procorders = self._orderspending
             proctrades = self._tradespending
 
+        print(procorders, 'aaaaa')
         for order in procorders:
             if order.exectype != order.Historical or order.histnotify:
                 self.notify_order(order)

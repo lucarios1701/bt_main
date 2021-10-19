@@ -556,6 +556,8 @@ class BackBroker(bt.BrokerBase):
             # @tuando: guess 'self.submitted' to keep track which orders are submited
             self.submitted.append(order)
             self.orders.append(order)
+            # @tuando: notify order saves the order information to notify in
+            # def notify_order of Strategy
             self.notify(order)
         else:
             self.submit_accept(order)
@@ -858,7 +860,6 @@ class BackBroker(bt.BrokerBase):
                           psize, pprice)
 
             order.addcomminfo(comminfo)
-
             self.notify(order)
             self._ococheck(order)
 
@@ -870,7 +871,7 @@ class BackBroker(bt.BrokerBase):
             self._bracketize(order, cancel=True)
 
     def notify(self, order):
-        self.notifs.append(order.clone())
+        self.notifs.append(order.clone())  # @tuando: clone the class of order
 
     def _try_exec_historical(self, order):
         self._execute(order, ago=0, price=order.created.price)

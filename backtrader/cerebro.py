@@ -1368,6 +1368,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''
         self._broker.next()
         while True:
+            # @tuando: get_notification will take out the order in the
+            # self.notifs which order was added in the broker steps
             order = self._broker.get_notification()
             if order is None:
                 break
@@ -1376,6 +1378,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
             if owner is None:
                 owner = self.runningstrats[0]  # default
 
+            # @tuando: _addnotification will add order to _orderspending which
+            # was use for _notify() processing
             owner._addnotification(order, quicknotify=self.p.quicknotify)
 
     def _runnext_old(self, runstrats):
