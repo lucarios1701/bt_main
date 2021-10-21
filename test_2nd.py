@@ -37,6 +37,7 @@ class TestStrategy(bt.Strategy):
             elif order.issell():
                 self.log('SELL EXECUTED, %.2f' % order.executed.price)
 
+            # @tuando: len(self) return the lenght of lineseries it mean return the length of data fowarded
             self.bar_executed = len(self)
 
         elif order.status in [order.Canceled, order.Margin, order.Rejected]:

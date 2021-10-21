@@ -250,7 +250,8 @@ class OrderBase(with_metaclass(MetaParams, object)):
     Buy, Sell = range(2)
 
     Created, Submitted, Accepted, Partial, Completed, \
-        Canceled, Expired, Margin, Rejected = range(9)
+        Canceled, Expired, Margin, Rejected = range(
+            9)  # @tuando: this will be used to notify thereafter
 
     Cancelled = Canceled  # alias
 

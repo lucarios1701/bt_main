@@ -762,14 +762,19 @@ class BackBroker(bt.BrokerBase):
         if closed:
             # Adjust to returned value for closed items & acquired opened items
             if self.p.shortcash:
+                # @tuando - guess: pprice_orig is the price in the position
+                # which was averaged by the open position price
                 closedvalue = comminfo.getvaluesize(-closed, pprice_orig)
             else:
                 closedvalue = comminfo.getoperationcost(closed, pprice_orig)
 
             closecash = closedvalue
             if closedvalue > 0:  # long position closed
+                # @tuando - guess: the closecash will be justyfied with leverage
+                # to increase the value following leveraging
                 closecash /= comminfo.get_leverage()  # inc cash with lever
 
+            # @tuando: comminfo is boolean if stocklike is False => 0.0, True => 1.0
             cash += closecash + pnl * comminfo.stocklike
             # Calculate and substract commission
             closedcomm = comminfo.getcommission(closed, price)
@@ -778,6 +783,7 @@ class BackBroker(bt.BrokerBase):
             if ago is not None:
                 # Cashadjust closed contracts: prev close vs exec price
                 # The operation can inject or take cash out
+                # @tuando - guess: use for future
                 cash += comminfo.cashadjust(-closed,
                                             position.adjbase,
                                             price)
@@ -785,6 +791,7 @@ class BackBroker(bt.BrokerBase):
                 # Update system cash
                 self.cash = cash
         else:
+            # @tuando - if not opened, openedvalue have to have value to run execute
             closedvalue = closedcomm = 0.0
 
         popened = opened
@@ -831,6 +838,7 @@ class BackBroker(bt.BrokerBase):
                 # update system cash - checking if opened is still != 0
                 self.cash = cash
         else:
+            # @tuando - if not opened, openedvalue have to have value to run execute
             openedvalue = openedcomm = 0.0
 
         if ago is None:

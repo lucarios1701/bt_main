@@ -591,7 +591,6 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             procorders = self._orderspending
             proctrades = self._tradespending
 
-        print(procorders, 'aaaaa')
         for order in procorders:
             if order.exectype != order.Historical or order.histnotify:
                 self.notify_order(order)
@@ -964,6 +963,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if isinstance(data, string_types):
             data = self.getdatabyname(data)
 
+        # @tuando - guess: if handle with multiple assets, data will be added by dataname
         data = data if data is not None else self.datas[0]
         size = size if size is not None else self.getsizing(data, isbuy=False)
 
