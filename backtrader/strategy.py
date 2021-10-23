@@ -522,19 +522,26 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if tradedata is None:
             tradedata = order.data
 
+        # @tuando: tradeid is the id of buy/sell
+        # @tuando: the first value of tradedata is the list() return by AutoDict class by default
         datatrades = self._trades[tradedata][order.tradeid]
         if not datatrades:
             trade = Trade(data=tradedata, tradeid=order.tradeid,
                           historyon=self._tradehistoryon)
+            # @tuando: self._trades of data have value after datatrades append
             datatrades.append(trade)
         else:
+            # @tuando - guess: if the last trade was not close in below
+            # "if exbit.opened" then adding infor to the last trade
+            # @tuando: trade close when close all (net off of size = 0) the old
+            # position
             trade = datatrades[-1]
 
         for exbit in order.executed.iterpending():
             if exbit is None:
                 break
 
-            if exbit.closed:
+            if exbit.closed:  # @tuando: exbit.closed when the position update an close the position
                 trade.update(order,
                              exbit.closed,
                              exbit.price,
@@ -544,17 +551,19 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                              comminfo=order.comminfo)
 
                 if trade.isclosed:
+                    # @tuando: only when closing position save the trade to notify_trade
                     self._tradespending.append(copy.copy(trade))
                     if quicknotify:
                         qtrades.append(copy.copy(trade))
 
             # Update it if needed
-            if exbit.opened:
-                if trade.isclosed:
+            if exbit.opened:  # @tuando: exbit.opened when the position update and open new position
+                if trade.isclosed:  # @tuando: if new exbit is open and the old trade isclosed, then creat the new Trade
                     trade = Trade(data=tradedata, tradeid=order.tradeid,
                                   historyon=self._tradehistoryon)
                     datatrades.append(trade)
 
+                # @tuando: new trade class
                 trade.update(order,
                              exbit.opened,
                              exbit.price,
@@ -566,7 +575,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                 # This extra check covers the case in which different tradeid
                 # orders have put the position down to 0 and the next order
                 # "opens" a position but "closes" the trade
-                if trade.isclosed:
+                if trade.isclosed:  # @tuando: dont understand this
                     self._tradespending.append(copy.copy(trade))
                     if quicknotify:
                         qtrades.append(copy.copy(trade))
@@ -592,7 +601,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             proctrades = self._tradespending
 
         for order in procorders:
-            if order.exectype != order.Historical or order.histnotify:
+            if order.exectype != order.Historical or order.histnotify:  # @tuando: doesn't verify this condition yet
                 self.notify_order(order)
             for analyzer in itertools.chain(self.analyzers,
                                             self._slave_analyzers):

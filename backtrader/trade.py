@@ -259,6 +259,8 @@ class Trade(object):
         self.size += size  # size will carry the opposite sign if reducing
 
         # Check if it has been currently opened
+        # @tuando: return false if oldsize is difference from size - guess: it
+        # means start to open the first position
         self.justopened = bool(not oldsize and size)
 
         if self.justopened:
@@ -273,6 +275,7 @@ class Trade(object):
         self.barlen = len(self.data) - self.baropen
 
         # record if the position was closed (set to null)
+        # @tuando: only closed when size = 0
         self.isclosed = bool(oldsize and not self.size)
 
         # record last bar for the trade

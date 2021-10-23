@@ -174,6 +174,7 @@ class OrderData(object):
     def __getitem__(self, key):
         return self.exbits[key]
 
+    # @tuando: only when real execute add was called
     def add(self, dt, size, price,
             closed=0, closedvalue=0.0, closedcomm=0.0,
             opened=0, openedvalue=0.0, openedcomm=0.0,
@@ -190,6 +191,7 @@ class OrderData(object):
     def addbit(self, exbit):
         # Stores an ExecutionBit and recalculates own values from ExBit
         # @tuando - guess: exbits saves the execution infor for the purpose of query historical
+        # @tuando: need to review when the exbit is added more than one
         self.exbits.append(exbit)
 
         self.remsize -= exbit.size
