@@ -42,6 +42,7 @@ class MetaLineIterator(LineSeries.__class__):
 
         # Prepare to hold children that need to be calculated and
         # influence minperiod - Moved here to support LineNum below
+        # @tuando: _lineiterators save the type of line iterators (e.g IndType: '0')
         _obj._lineiterators = collections.defaultdict(list)
 
         # Scan args for datas ... if none are found,
@@ -207,6 +208,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
 
     def addindicator(self, indicator):
         # store in right queue
+        # @tuando: _ltype is the IndType, so addindicator just only adds IndType (i.e: labeled '0')
         self._lineiterators[indicator._ltype].append(indicator)
 
         # use getattr because line buffers don't have this attribute
@@ -298,6 +300,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         self.forward(size=self._clock.buflen())
 
         for indicator in self._lineiterators[LineIterator.IndType]:
+            # @tuando: if dont call this, the _once was called only Strategy's,
+            # this will call for the indicator class
             indicator._once()
 
         for observer in self._lineiterators[LineIterator.ObsType]:
@@ -321,10 +325,11 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         # indicators are each called with its min period
         self.preonce(0, self._minperiod - 1)
         self.oncestart(self._minperiod - 1, self._minperiod)
+        # @tuando: this 'once' will calculated required data (e.g Average) for indicators (e.g SMA)
         self.once(self._minperiod, self.buflen())
 
         for line in self.lines:
-            line.oncebinding()
+            line.oncebinding()  # @tuando: this fill value to the array of line
 
     def preonce(self, start, end):
         pass
@@ -332,7 +337,7 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     def oncestart(self, start, end):
         self.once(start, end)
 
-    def once(self, start, end):
+    def once(self, start, end):  # @tuando - guess: this once used for Indicator (Average e.g)
         pass
 
     def prenext(self):
@@ -348,11 +353,10 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         all datas/indicators have been meet. The default behavior is to call
         next
         '''
-
         # Called once for 1st full calculation - defaults to regular next
         self.next()
 
-    def next(self):
+    def next(self):  # @tuando - guess: this next used for Indicator (Average e.g)
         '''
         This method will be called for all remaining data points when the
         minimum period for all datas/indicators have been meet.

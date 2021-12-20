@@ -58,9 +58,12 @@ class LineAlias(object):
     def __init__(self, line):
         self.line = line
 
-    # @tuando: guess that self.line will refer instance to the index was labeled before of 'close', 'high', etc...
+    # @tuando: guess that self.line will refer instance to the index was
+    # labeled before of 'close', 'high', etc...
     def __get__(self, obj, cls=None):
-        # @tuando: this will be call in 'Lines' class then refer to the Linebuffer had index 'self.line' in self.lines list was created before
+        # @tuando: this will be call in 'Lines' class then refer to the
+        # Linebuffer had index 'self.line' in self.lines list was created before
+        # @tuando: this returns LineBuffer by order of self.line
         return obj.lines[self.line]
 
     def __set__(self, obj, value):
@@ -70,7 +73,11 @@ class LineAlias(object):
         to the line inside "value"
         '''
         if isinstance(value, LineMultiple):
+            # @tuando: in case of SMA class, value.lines[0] will refer to the
+            # lines of Average class
+            # @tuando: value before is the Average
             value = value.lines[0]
+            # @tuando: value after is the LineBuffer
 
         # If the now for sure, LineBuffer 'value' is not a LineActions the
         # binding below could kick-in too early in the chain writing the value
@@ -80,6 +87,10 @@ class LineAlias(object):
         if not isinstance(value, LineActions):
             value = value(0)
 
+        # @tuando: the value is the LineBuffer of Average, so binding
+        # added will be added to Average class
+        # @tuando: value is the value of Average, but obj.lines is the lines of
+        # 'sma'
         value.addbinding(obj.lines[self.line])
 
 
@@ -164,7 +175,6 @@ class Lines(object):  # @tuando: 'Lines' is a based class temporarily save the i
             if not isinstance(linealias, string_types):
                 # a tuple or list was passed, 1st is name
                 linealias = linealias[0]
-
             desc = LineAlias(line)  # keep a reference below
             setattr(newcls, linealias, desc)
 
@@ -194,8 +204,13 @@ class Lines(object):  # @tuando: 'Lines' is a based class temporarily save the i
         Return the alias for a line given the index
         '''
         lines = cls._getlines()
+        # @tuando - guess: in case passed 'i' is greater then len lines
+        # (e.g: only 'sma' will have len=1, OHLC have len=4 for example)
+        # so no linealias attribute is passed value
         if i >= len(lines):
             return ''
+        # @tuando: lines save the information of 'lines' name, so lines[i] will
+        # get the name of i (e.g 'sma')
         linealias = lines[i]
         return linealias
 
@@ -254,6 +269,8 @@ class Lines(object):  # @tuando: 'Lines' is a based class temporarily save the i
         '''
         Proxy line operation
         '''
+        # @tuando: self.sma is the LineAlias so will be refered to __set__ in
+        # LineAlias class
         setattr(self, self._getlinealias(line), value)
 
     def forward(self, value=NAN, size=1):
@@ -340,6 +357,9 @@ class MetaLineSeries(LineMultiple.__class__):
         the class attributes
         '''
         # Get the aliases - don't leave it there for subclasses
+        # @tuando - guess: alias in the Indicator base is get from here
+        # @tuando: setdefault method return the value of key called, if doesnt
+        # have create new with the value assigned
         aliases = dct.setdefault('alias', ())
         aliased = dct.setdefault('aliased', '')
 
@@ -394,6 +414,8 @@ class MetaLineSeries(LineMultiple.__class__):
             'pl_' + name, newplotlines, morebasesplotlines, recurse=True)
 
         # create declared class aliases (a subclass with no modifications)
+        # @tuando: this means if the class have alias name, so re-create new
+        # same class with that name for called
         for alias in aliases:
             newdct = {'__doc__': cls.__doc__,
                       '__module__': cls.__module__,
@@ -405,8 +427,11 @@ class MetaLineSeries(LineMultiple.__class__):
                 alias = alias[0]
                 newdct['plotinfo'] = dict(plotname=aliasplotname)
 
+            # @tuando: create class with the name 'alias"
             newcls = type(str(alias), (cls,), newdct)
+            # @tuando: the module where the class was called
             clsmodule = sys.modules[cls.__module__]
+            # @tuando: set the alias for class to where the class was called
             setattr(clsmodule, alias, newcls)
 
         # return the class
@@ -443,6 +468,7 @@ class MetaLineSeries(LineMultiple.__class__):
 
         if _obj.lines.fullsize():
             # @tuando: _obj.lines[0] is called through __getitem__ of 'Lines' class
+            # @tuando: this _obj.line was created as alias for calculating indicator
             _obj.line = _obj.lines[0]
 
         for l, line in enumerate(_obj.lines):
@@ -463,6 +489,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
 
     csv = True
 
+    # @tuando: this 'array' is to get array form basicops (e.g self.data.array)
     @property
     def array(self):
         return self.lines[0].array
@@ -554,10 +581,9 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
             lineobj = self._getline(line, minusall=True)
             if lineobj is not None:
                 args[0] = lineobj
-
             return LinesCoupler(*args, _ownerskip=self)
 
-        # else -> assume type(ago) == int -> return LineDelay object
+        # else -> assume type(ago) == int -> return LineDelay object)
         return LineDelay(self._getline(line), ago, _ownerskip=self)
 
     # The operations below have to be overriden to make sure subclasses can

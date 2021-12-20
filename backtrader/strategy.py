@@ -271,7 +271,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         # @tuando: self.datas will increase because datas are being 'advance()' before in cerebro
         # @tuando: because of calling 'advance()' first so the lenght of 1st datas will be 1
         # @tuando: guess - this minus only be used for the purpose of calling 'next()' function in '_onepost'
+        # @tuando: this also use for determine _minperiod to pass to calculate
+        # indicator (e.g sma)
         dlens = map(operator.sub, self._minperiods, map(len, self.datas))
+        print(self._minperiod, 'xxxx')
         self._minperstatus = minperstatus = max(dlens)
         return minperstatus
 
@@ -1456,13 +1459,15 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if sizer is None:
             self.setsizer(bt.sizers.FixedSize())
         else:
+            # @tuando: this **kwargs will be replace the name of params with
+            # the same name params in the default class
             self.setsizer(sizer(*args, **kwargs))
 
     def setsizer(self, sizer):
         '''
         Replace the default (fixed stake) sizer
         '''
-        self._sizer = sizer
+        self._sizer = sizer  # @tuando: this changes the default _sizer class of Strategy to the new
         sizer.set(self, self.broker)
         return sizer
 

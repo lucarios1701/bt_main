@@ -41,6 +41,7 @@ class PeriodN(Indicator):
 
     def __init__(self):
         super(PeriodN, self).__init__()
+        # @tuando: set the min period to the _minperiod of LineRoot
         self.addminperiod(self.p.period)
 
 
@@ -57,8 +58,10 @@ class OperationN(PeriodN):
     Formula:
       - line = func(data, period)
     '''
+
     def next(self):
         self.line[0] = self.func(self.data.get(size=self.p.period))
+        return
 
     def once(self, start, end):
         dst = self.line.array
@@ -356,11 +359,16 @@ class Average(PeriodN):
             math.fsum(self.data.get(size=self.p.period)) / self.p.period
 
     def once(self, start, end):
+        # @tuando: .array funciton is defined as @property in LineSeries
         src = self.data.array
+        # @tuando: self.line is the self.lines[0] in lineseries
         dst = self.line.array
         period = self.p.period
 
         for i in range(start, end):
+            # @tuando: when 'dst' is changed new value, self.line.array also
+            # will change new same values
+            # After this, self.line.array will have 'Mean" value inside
             dst[i] = math.fsum(src[i - period + 1:i + 1]) / period
 
 

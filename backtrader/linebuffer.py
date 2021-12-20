@@ -307,6 +307,7 @@ class LineBuffer(LineSingle):
             binding (LineBuffer): another line that must be set when this line
             becomes a value
         '''
+        # @tuando: guess this self.bindings have 1 value added by sma
         self.bindings.append(binding)
         # record in the binding when the period is starting (never sooner
         # than self)
@@ -340,6 +341,10 @@ class LineBuffer(LineSingle):
         '''
         larray = self.array
         blen = self.buflen()
+        # @tuando - guess: the binding of 'sma' will be filled
+        # (the lines array of sma will be filled)
+        # @tuando: because binding value is the sma was added through Average __set__
+        # so this will add value to .array of sma
         for binding in self.bindings:
             binding.array[0:blen] = larray[0:blen]
 

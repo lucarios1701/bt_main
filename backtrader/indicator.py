@@ -51,7 +51,6 @@ class MetaIndicator(IndicatorBase.__class__):
     def __call__(cls, *args, **kwargs):
         if not cls._icacheuse:
             return super(MetaIndicator, cls).__call__(*args, **kwargs)
-
         # implement a cache to avoid duplicating lines actions
         ckey = (cls, tuple(args), tuple(kwargs.items()))  # tuples hashable
         try:
@@ -70,16 +69,19 @@ class MetaIndicator(IndicatorBase.__class__):
         '''
         # Initialize the class
         super(MetaIndicator, cls).__init__(name, bases, dct)
-
         if not cls.aliased and \
            name != 'Indicator' and not name.startswith('_'):
             refattr = getattr(cls, cls._refname)
             refattr[name] = cls
 
         # Check if next and once have both been overridden
+        # @tuando: IndicatorBase.next/once are the next/once function havent
+        # been overridden of Lineiterator class cls.next/once are the next/once
+        # of the function defined by indicator
+        # This is used for the purpose of checking if next/once function have
+        # already been overridden
         next_over = cls.next != IndicatorBase.next
         once_over = cls.once != IndicatorBase.once
-
         if next_over and not once_over:
             # No -> need pointer movement to once simulation via next
             cls.once = cls.once_via_next

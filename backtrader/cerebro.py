@@ -1239,6 +1239,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         if runstrats:
             # loop separated for clarity
+            # @tuando: get(key, value), if None key exist get None, if not
+            # return the default (None, None, None)
             defaultsizer = self.sizers.get(None, (None, None, None))
             for idx, strat in enumerate(runstrats):
                 if self.p.stdstats:
@@ -1263,6 +1265,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 for ancls, anargs, ankwargs in self.analyzers:
                     strat._addanalyzer(ancls, *anargs, **ankwargs)
 
+                # @tuando: get the sizer following idx of strategy, if not return defaultsizer as value
                 sizer, sargs, skwargs = self.sizers.get(idx, defaultsizer)
                 if sizer is not None:
                     strat._addsizer(sizer, *sargs, **skwargs)

@@ -35,11 +35,17 @@ class MovingAverageSimple(MovingAverageBase):
       - http://en.wikipedia.org/wiki/Moving_average#Simple_moving_average
     '''
     alias = ('SMA', 'SimpleMovingAverage',)
+    # @tuando: Need to have this lines to add to LineBuffer in Lines __init__
     lines = ('sma',)
 
     def __init__(self):
         # Before super to ensure mixins (right-hand side in subclassing)
         # can see the assignment operation and operate on the line
+        # @tuando - guess: self.lines[0] have no data because this is 'sma' lines belonging to SMA class
+        # but self.data has data because it is 'close' lines and belong to YahooCSVData class
         self.lines[0] = Average(self.data, period=self.p.period)
+        # @tuando: note-guess: self.lines[0] is the LineBuffer 'sma' was set
+        # by the LineAlias, set value into it will refer to __setitem__ of Line
+        # then the set value will be refered to __set__ of LineAlias
 
         super(MovingAverageSimple, self).__init__()

@@ -37,7 +37,7 @@ class FixedSize(bt.Sizer):
       - ``tranches`` (default: ``1``)
     '''
 
-    params = (('stake', 1),
+    params = (('stake', 1),  # @tuando: stake will be the default size to execute
               ('tranches', 1))
 
     def _getsizing(self, comminfo, cash, data, isbuy):
