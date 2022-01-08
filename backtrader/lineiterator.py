@@ -125,7 +125,6 @@ class MetaLineIterator(LineSeries.__class__):
         # that provided by the datas
         for line in _obj.lines:
             line.addminperiod(_obj._minperiod)
-
         return _obj, args, kwargs
 
     def dopostinit(cls, _obj, *args, **kwargs):
@@ -133,7 +132,9 @@ class MetaLineIterator(LineSeries.__class__):
             super(MetaLineIterator, cls).dopostinit(_obj, *args, **kwargs)
 
         # my minperiod is as large as the minperiod of my lines
+        print(_obj._minperiod, '====THIS BEFORE INIT=====', _obj)
         _obj._minperiod = max([x._minperiod for x in _obj.lines])
+        print(_obj._minperiod, 'xxxxxxTHIS AFTER INITxxxxxxx', _obj)
 
         # Recalc the period
         _obj._periodrecalc()
@@ -209,6 +210,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     def addindicator(self, indicator):
         # store in right queue
         # @tuando: _ltype is the IndType, so addindicator just only adds IndType (i.e: labeled '0')
+
+        print(indicator._minperiod, '====THIS BELONG ADD===', indicator)
         self._lineiterators[indicator._ltype].append(indicator)
 
         # use getattr because line buffers don't have this attribute

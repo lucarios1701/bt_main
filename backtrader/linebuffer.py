@@ -213,7 +213,8 @@ class LineBuffer(LineSingle):
 
         return self.array[idx:idx + size]
 
-    # @tuando: setitem will be use to set data (OHLC) to respectively self.lines (of OHLC) in yahoo.py
+    # @tuando: setitem will be use to set data (OHLC) to respectively self.lines
+    # (of OHLC) in yahoo.py
     def __setitem__(self, ago, value):
         ''' Sets a value at position "ago" and executes any associated bindings
 
@@ -378,7 +379,6 @@ class LineBuffer(LineSingle):
         from .lineiterator import LineCoupler
         if ago is None or isinstance(ago, LineRoot):
             return LineCoupler(self, ago)
-
         return LineDelay(self, ago)
 
     def _makeoperation(self, other, operation, r=False, _ownerskip=None):
@@ -560,7 +560,6 @@ class MetaLineActions(LineBuffer.__class__):
         _minperiods += [x._minperiod for x in mlines]
 
         _minperiod = max(_minperiods or [1])
-
         # update own minperiod if needed
         _obj.updateminperiod(_minperiod)
 

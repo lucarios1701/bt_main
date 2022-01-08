@@ -153,6 +153,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                     it.qbuffer(savemem=1)
 
     def _periodset(self):
+        # @tuando-guess: _periodset is used to set the minperiod counting for
+        # indicator (it will be compare in lineiterator before next called)
+
+        # @tuando: dataids is the unique id of each data in datas
         dataids = [id(data) for data in self.datas]
 
         _dminperiods = collections.defaultdict(list)
@@ -187,6 +191,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             if isinstance(clk, LineSeriesStub):
                 clk = clk.lines[0]
 
+            print(lineiter._minperiod, 'xxxxxx')
             _dminperiods[clk].append(lineiter._minperiod)
 
         self._minperiods = list()
@@ -204,6 +209,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
                     dlminperiods += _dminperiods[l]  # found, add it
 
             # keep the reference to the line if any was found
+            # @tuando - guess: this will take minperiods of indicator feed to strategy
+            # then count down to call next
             _dminperiods[data] = [max(dlminperiods)] if dlminperiods else []
 
             dminperiod = max(_dminperiods[data] or [data._minperiod])
@@ -274,7 +281,6 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         # @tuando: this also use for determine _minperiod to pass to calculate
         # indicator (e.g sma)
         dlens = map(operator.sub, self._minperiods, map(len, self.datas))
-        print(self._minperiod, 'xxxx')
         self._minperstatus = minperstatus = max(dlens)
         return minperstatus
 
