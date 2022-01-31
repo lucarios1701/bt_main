@@ -557,10 +557,15 @@ class MetaLineActions(LineBuffer.__class__):
         _minperiods = [x._minperiod for x in args if isinstance(x, LineSingle)]
 
         mlines = [x.lines[0] for x in args if isinstance(x, LineMultiple)]
+
         _minperiods += [x._minperiod for x in mlines]
 
         _minperiod = max(_minperiods or [1])
         # update own minperiod if needed
+        # @tuando: This will update _minperiod of of _LineDelay, then
+        # from self._minperiod of _LineDelay, addbinding will update _minperiod of
+        # LineBuffer or self.lines[0] in sma
+        # @tuando - note: addbinding will be call when __set__ called in sma
         _obj.updateminperiod(_minperiod)
 
         return _obj, args, kwargs
@@ -570,6 +575,8 @@ class MetaLineActions(LineBuffer.__class__):
             super(MetaLineActions, cls).dopostinit(_obj, *args, **kwargs)
 
         # register with _owner to be kicked later
+        # @tuando-guess: _owner is the SimpleMovingAverage class, this will
+        # add the _LineDelay to the lineiterator of SMA
         _obj._owner.addindicator(_obj)
 
         return _obj, args, kwargs
@@ -642,6 +649,7 @@ class LineActions(with_metaclass(MetaLineActions, LineBuffer)):
 
 def LineDelay(a, ago=0, **kwargs):
     if ago <= 0:
+        # @tuando: args will have a=LineBuffer and ago=0
         return _LineDelay(a, ago, **kwargs)
 
     return _LineForward(a, ago, **kwargs)

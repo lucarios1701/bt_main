@@ -85,12 +85,15 @@ class LineAlias(object):
         # index too early and breaking the functionality (all in next mode)
         # Hence the need to transform it into a LineDelay object of null delay
         if not isinstance(value, LineActions):
+            # @tuando: This will call LineDelay and update _minperiod for lines[0]
+            # of sma class
             value = value(0)
 
         # @tuando: the value is the LineBuffer of Average, so binding
         # added will be added to Average class
         # @tuando: value is the value of Average, but obj.lines is the lines of
         # 'sma'
+        # value() transfered original value to _LineDelay
         value.addbinding(obj.lines[self.line])
 
 

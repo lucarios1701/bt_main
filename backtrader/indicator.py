@@ -94,6 +94,8 @@ class Indicator(with_metaclass(MetaIndicator, IndicatorBase)):
 
     csv = False
 
+    # @tuando: This advance will advance for the indicator, e.g idx in LineBuffer
+    # of 'sma' will be increase by advance
     def advance(self, size=1):
         # Need intercepting this call to support datas with
         # different lengths (timeframes)

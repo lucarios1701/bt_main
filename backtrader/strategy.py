@@ -190,8 +190,6 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             # no the wrapper itself.
             if isinstance(clk, LineSeriesStub):
                 clk = clk.lines[0]
-
-            print(lineiter._minperiod, 'xxxxxx')
             _dminperiods[clk].append(lineiter._minperiod)
 
         self._minperiods = list()
@@ -206,6 +204,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
             for l in data.lines:  # search each line for min periods
                 if l in _dminperiods:
+                    # @tuando - guess: this will suffer lines and see if
+                    # there're any higher minperiod required
                     dlminperiods += _dminperiods[l]  # found, add it
 
             # keep the reference to the line if any was found
@@ -303,6 +303,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext_open()
 
     def _oncepost(self, dt):
+        # @tuando: this will call the advance of indicator
         for indicator in self._lineiterators[LineIterator.IndType]:
             if len(indicator._clock) > len(indicator):
                 indicator.advance()
