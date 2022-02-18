@@ -260,14 +260,16 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             obsname = obscls.__name__.lower()
 
         if not multi:
+            # @tuando - guess: list of datas
             newargs = list(itertools.chain(self.datas, obsargs))
+            # @tuando: When obscals called, dopreinit of LineIterator will
+            # 'addindicator' then ObsType will be added to self._lineindicators
             obs = obscls(*newargs, **obskwargs)
             self.stats.append(obs, obsname)
             return
 
         setattr(self.stats, obsname, list())
         l = getattr(self.stats, obsname)
-
         for data in self.datas:
             obs = obscls(data, *obsargs, **obskwargs)
             l.append(obs)

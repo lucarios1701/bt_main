@@ -209,13 +209,16 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         return [x for x in self._lineiterators[LineIterator.IndType]
                 if hasattr(x.lines, 'getlinealiases')]
 
+    # @tuando: observers for the plotting purpose
     def getobservers(self):
         return self._lineiterators[LineIterator.ObsType]
 
     def addindicator(self, indicator):
         # store in right queue
-        # @tuando: _ltype is the IndType, so addindicator just only adds IndType (i.e: labeled '0')
-
+        # @tuando: _ltype is the IndType, so addindicator just only adds
+        # IndType (i.e: labeled '0')
+        # @tuando: Observers also added by this, in the case _ltype is ObsType
+        # (labeled '2')
         self._lineiterators[indicator._ltype].append(indicator)
 
         # use getattr because line buffers don't have this attribute

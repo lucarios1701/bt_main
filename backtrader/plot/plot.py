@@ -116,9 +116,11 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     def plot(self, strategy, figid=0, numfigs=1, iplot=True,
              start=None, end=None, **kwargs):
         # pfillers={}):
+        # @tuando: Check if strategy wasnt loaded data
         if not strategy.datas:
             return
 
+        # @tuando: Check if 'lines' wasnt loaded data
         if not len(strategy):
             return
 
@@ -134,6 +136,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
         self.sortdataindicators(strategy)
         self.calcrows(strategy)
 
+        # @tuando: return array of strategy datetime
         st_dtime = strategy.lines.datetime.plot()
         if start is None:
             start = 0
@@ -186,6 +189,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             # Things that go always at the top (observers)
             self.pinf.xdata = self.pinf.x
             for ptop in self.dplotstop:
+                # @tuando: plot indicator
                 self.plotind(None, ptop, subinds=self.dplotsover[ptop])
 
             # Create the rest on a per data basis

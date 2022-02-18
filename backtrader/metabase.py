@@ -119,10 +119,14 @@ class AutoInfoClass(object):
         # The info of the new class is a copy of the full base info
         # plus and update from parameter
         clsinfo = baseinfo.copy()
+        # @tuando: update(info) will update the params of class to classinfo
         clsinfo.update(info)
 
         # The new items to update/set are those from the otherbase plus the new
+        # @tuando: at first version of backtrader research, we havent had
+        # obasesinfo yet
         info2add = obasesinfo.copy()
+        # @tuando: update(info) will update the params of class to classinfo
         info2add.update(info)
 
         clsmodule = sys.modules[cls.__module__]
@@ -146,6 +150,8 @@ class AutoInfoClass(object):
         setattr(newcls, '_getpairs', classmethod(lambda cls: clsinfo.copy()))
         setattr(newcls, '_getrecurse', classmethod(lambda cls: recurse))
 
+        # @tuando - guess: this will add the info (e.g plotinfo) for plotting,
+        # etc.
         for infoname, infoval in info2add.items():
             if recurse:
                 recursecls = getattr(newcls, infoname, AutoInfoClass)

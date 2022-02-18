@@ -1265,7 +1265,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 for ancls, anargs, ankwargs in self.analyzers:
                     strat._addanalyzer(ancls, *anargs, **ankwargs)
 
-                # @tuando: get the sizer following idx of strategy, if not return defaultsizer as value
+                # @tuando: get the sizer following idx of strategy, if not
+                # return defaultsizer as value
                 sizer, sargs, skwargs = self.sizers.get(idx, defaultsizer)
                 if sizer is not None:
                     strat._addsizer(sizer, *sargs, **skwargs)
@@ -1342,6 +1343,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
             return results
 
+        # @tuando: return for append
         return runstrats
 
     def stop_writers(self, runstrats):

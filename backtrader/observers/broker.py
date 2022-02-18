@@ -91,6 +91,7 @@ class Broker(Observer):
     )
 
     alias = ('CashValue',)
+    # @tuando: Every Obj must have lines to process
     lines = ('cash', 'value')
 
     plotinfo = dict(plot=True, subplot=True)

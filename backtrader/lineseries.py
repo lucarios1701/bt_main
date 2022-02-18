@@ -578,7 +578,6 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
           The referenced line (index or name) will be LineDelayed
         '''
         from .lineiterator import LinesCoupler  # avoid circular import
-
         if ago is None or isinstance(ago, LineRoot):
             args = [self, ago]
             lineobj = self._getline(line, minusall=True)

@@ -210,7 +210,6 @@ class LineBuffer(LineSingle):
         '''
         if self.useislice:
             return list(islice(self.array, idx, idx + size))
-
         return self.array[idx:idx + size]
 
     # @tuando: setitem will be use to set data (OHLC) to respectively self.lines
@@ -328,6 +327,7 @@ class LineBuffer(LineSingle):
         Returns:
             A slice of the underlying buffer
         '''
+        # @tuando: len(self) is the len of data strategy fowarded
         return self.getzero(idx, size or len(self))
 
     def plotrange(self, start, end):

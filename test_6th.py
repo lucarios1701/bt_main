@@ -23,6 +23,7 @@ class TestStrategy(bt.Strategy):
     def __init__(self):
         # Keep a reference to the "close" line in the data[0] dataseries
         self.dataclose = self.datas[0].close
+        self.dataopen = self.datas[0].open
 
         # To keep track of pending orders and buy price/commission
         self.order = None
@@ -34,14 +35,14 @@ class TestStrategy(bt.Strategy):
             self.datas[0], period=self.params.maperiod)
 
         # Indicators for the plotting show
-        bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
-        bt.indicators.WeightedMovingAverage(self.datas[0], period=25,
-                                            subplot=True)
-        bt.indicators.StochasticSlow(self.datas[0])
-        bt.indicators.MACDHisto(self.datas[0])
-        rsi = bt.indicators.RSI(self.datas[0])
-        bt.indicators.SmoothedMovingAverage(rsi, period=10)
-        bt.indicators.ATR(self.datas[0], plot=False)
+        # bt.indicators.ExponentialMovingAverage(self.datas[0], period=25)
+        # bt.indicators.WeightedMovingAverage(self.datas[0], period=25,
+        #                                     subplot=True)
+        # bt.indicators.StochasticSlow(self.datas[0])
+        # bt.indicators.MACDHisto(self.datas[0])
+        # rsi = bt.indicators.RSI(self.datas[0])
+        # bt.indicators.SmoothedMovingAverage(rsi, period=10)
+        # bt.indicators.ATR(self.datas[0], plot=False)
 
     def notify_order(self, order):
         if order.status in [order.Submitted, order.Accepted]:
