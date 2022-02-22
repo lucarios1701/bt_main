@@ -408,6 +408,8 @@ class MetaLineSeries(LineMultiple.__class__):
 
         # Before doing plotline newlines have been added and no plotlineinfo
         # is there add a default
+        # @tuando - guess: newplotlines will save the lines of Observer
+        # (e.g Broker, Buy, Sell) as dict() then process later to Plot
         for line in newlines:
             newplotlines.setdefault(line, dict())
 
@@ -464,6 +466,8 @@ class MetaLineSeries(LineMultiple.__class__):
         _obj.lines = cls.lines()
 
         # _obj.plotinfo shadows the plotinfo (class) definition in the class
+        # @tuando: This will call the plotlines() then will call the __new__
+        # of AutoInfoclass (in case of ploting)
         _obj.plotlines = cls.plotlines()
 
         # add aliases for lines and for the lines class itself

@@ -188,6 +188,7 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
             # Do the plotting
             # Things that go always at the top (observers)
             self.pinf.xdata = self.pinf.x
+            # @tuando: dplotstop list of Observer
             for ptop in self.dplotstop:
                 # @tuando: plot indicator
                 self.plotind(None, ptop, subinds=self.dplotsover[ptop])
@@ -383,7 +384,6 @@ class Plot_OldSync(with_metaclass(MetaParams, object)):
     def plotind(self, iref, ind,
                 subinds=None, upinds=None, downinds=None,
                 masterax=None):
-
         sch = self.p.scheme
 
         # check subind

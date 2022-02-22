@@ -150,15 +150,17 @@ class AutoInfoClass(object):
         setattr(newcls, '_getpairs', classmethod(lambda cls: clsinfo.copy()))
         setattr(newcls, '_getrecurse', classmethod(lambda cls: recurse))
 
-        # @tuando - guess: this will add the info (e.g plotinfo) for plotting,
+        # @tuando - guess: this will add the info (e.g plotinfo) for ploting,
         # etc.
         for infoname, infoval in info2add.items():
+            # @tuando - recurse is True when add 'plotlines' in lineseries
             if recurse:
                 recursecls = getattr(newcls, infoname, AutoInfoClass)
                 infoval = recursecls._derive(name + '_' + infoname,
                                              infoval,
                                              [])
-
+            # @tuando: the infoname is the name from 'lines' params
+            # @tuando: this will set the class which has
             setattr(newcls, infoname, infoval)
 
         return newcls
@@ -203,12 +205,14 @@ class AutoInfoClass(object):
 
     def __new__(cls, *args, **kwargs):
         obj = super(AutoInfoClass, cls).__new__(cls, *args, **kwargs)
-
         if cls._getrecurse():
+            print('kkkkkkkkkkkkkkkkk')
+            # @tuando: When recurse happened in plot purpose, this
+            # transforms obj from (class to object), havent understood why yet
+            # (e.g getattr(ind.plotlines, linealias, None) example in plot.py)
             for infoname in obj._getkeys():
                 recursecls = getattr(cls, infoname)
                 setattr(obj, infoname, recursecls())
-
         return obj
 
 
