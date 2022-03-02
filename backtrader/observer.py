@@ -61,6 +61,7 @@ class Observer(with_metaclass(MetaObserver, ObserverBase)):
     def _register_analyzer(self, analyzer):
         self._analyzers.append(analyzer)
 
+    # @tuando: _start to call start() in _start strategy
     def _start(self):
         self.start()
 

@@ -333,7 +333,7 @@ class LineBuffer(LineSingle):
     def plotrange(self, start, end):
         if self.useislice:
             return list(islice(self.array, start, end))
-
+        # @tuando: how can the array of Observer have data?
         return self.array[start:end]
 
     def oncebinding(self):  # @tuando: didn't reasearch this yet

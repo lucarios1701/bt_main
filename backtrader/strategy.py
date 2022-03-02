@@ -271,6 +271,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         setattr(self.stats, obsname, list())
         l = getattr(self.stats, obsname)
         for data in self.datas:
+            # @tuando - guess: this will give Observer can access data of strategy
             obs = obscls(data, *obsargs, **obskwargs)
             l.append(obs)
 
@@ -330,6 +331,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             self.prenext()
 
         self._next_analyzers(minperstatus, once=True)
+        # @tuando: this will call the next of Observers then do data transmit to
+        # Observer lines (e.g 'cash', 'value' in case of broker observer)
         self._next_observers(minperstatus, once=True)
 
         self.clear()
@@ -413,8 +416,10 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
             analyzer._start()
 
+        # @tuando: this will call the start() of Observer
         for obs in self.observers:
             if not isinstance(obs, list):
+                # @tuand-guess: create list just for the loop thereafter
                 obs = [obs]  # support of multi-data observers
 
             for o in obs:

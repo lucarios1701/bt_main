@@ -84,6 +84,7 @@ class Broker(Observer):
 
     Params: None
     '''
+    # @tuando: _stclock = True will set the owner of Broker = Strategy
     _stclock = True
 
     params = (

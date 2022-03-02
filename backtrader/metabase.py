@@ -206,7 +206,6 @@ class AutoInfoClass(object):
     def __new__(cls, *args, **kwargs):
         obj = super(AutoInfoClass, cls).__new__(cls, *args, **kwargs)
         if cls._getrecurse():
-            print('kkkkkkkkkkkkkkkkk')
             # @tuando: When recurse happened in plot purpose, this
             # transforms obj from (class to object), havent understood why yet
             # (e.g getattr(ind.plotlines, linealias, None) example in plot.py)
@@ -321,6 +320,7 @@ class ItemCollection(object):
       - Index
       - Name (if set in the append operation)
     '''
+    # @tuando: create a class to save and get list() data
 
     def __init__(self):
         self._items = list()

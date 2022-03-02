@@ -1255,7 +1255,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                         strat._addobserver(False, observers.Trades)
                     else:
                         strat._addobserver(False, observers.DataTrades)
-
                 for multi, obscls, obsargs, obskwargs in self.observers:
                     strat._addobserver(multi, obscls, *obsargs, **obskwargs)
 

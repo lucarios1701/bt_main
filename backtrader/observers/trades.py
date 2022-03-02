@@ -89,13 +89,18 @@ class Trades(Observer):
         self.trades_length_min = 0
 
     def next(self):
+        # @tuando: _owner is the Strategy
         for trade in self._owner._tradespending:
+            # @tuando: dont understand this
             if trade.data not in self.ddatas:
                 continue
 
+            # @tuando: if the positions are not close so continue
+            # else save the pnl for plotting
             if not trade.isclosed:
                 continue
 
+            # @tuando: pnl is the pnl recorded from trade
             pnl = trade.pnlcomm if self.p.pnlcomm else trade.pnl
 
             if pnl >= 0.0:

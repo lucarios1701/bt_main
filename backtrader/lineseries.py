@@ -524,6 +524,7 @@ class LineSeries(with_metaclass(MetaLineSeries, LineMultiple)):
         super(LineSeries, self).__init__()
         pass
 
+    # @tuando - guess: create label for ploting
     def plotlabel(self):
         label = self.plotinfo.plotname or self.__class__.__name__
         sublabels = self._plotlabel()

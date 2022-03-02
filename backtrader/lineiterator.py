@@ -303,8 +303,11 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
         return clock_len
 
     def _once(self):
-        # @tuando: the size of 'forward' is the data points that will be added to 'array' in 'linebuffer'
-        # @tuando: guess: because this 'function' is called when 'strat' is initiated, so forward will created an empty array with required lenght
+        # @tuando: the size of 'forward' is the data points that will be
+        # added to 'array' in 'linebuffer'
+        # @tuando: guess: because this 'function' is called when 'strat' is
+        # initiated, so forward will created an empty array with required
+        # lenght
         # @tuando: this will save the data lenght we need
         # @tuando: - guess this will forward for strats class
         self.forward(size=self._clock.buflen())
