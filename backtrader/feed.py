@@ -177,6 +177,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         self._tzinput = bt.utils.date.Localizer(self._gettzinput())
 
         # Convert user input times to the output timezone (or min/max)
+        # @tuando: in case of livetrading, data without fromdate and todate, so
+        # it will be None
         if self.p.fromdate is None:
             self.fromdate = float('-inf')
         else:

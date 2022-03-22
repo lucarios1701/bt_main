@@ -92,7 +92,6 @@ class MetaSingleton(MetaParams):
         if cls._singleton is None:
             cls._singleton = (
                 super(MetaSingleton, cls).__call__(*args, **kwargs))
-
         return cls._singleton
 
 
@@ -198,7 +197,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
 
     def __init__(self):
         super(IBStore, self).__init__()
-
         self._lock_q = threading.Lock()  # sync access to _tickerId/Queues
         self._lock_accupd = threading.Lock()  # sync account updates
         self._lock_pos = threading.Lock()  # sync account updates

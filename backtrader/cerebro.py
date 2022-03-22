@@ -755,6 +755,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             data._name = name
 
         data._id = next(self._dataid)
+        # @tuando: data will set the environment which is Cerebro for each data
         data.setenvironment(self)
 
         self.datas.append(data)
@@ -766,7 +767,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
 
         if data.islive():
             self._dolive = True
-
         return data
 
     def chaindata(self, *args, **kwargs):
@@ -836,7 +836,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''
         if any(dataname is x for x in self.datas):
             dataname = dataname.clone()
-
         dataname.resample(**kwargs)
         self.adddata(dataname, name=name)
         self._doreplay = True
@@ -1068,6 +1067,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             # are constructed in realtime
             self._dopreload = False
 
+        # @tuando: if live trading so, do not need to preload data
         if self._dolive or self.p.live:
             # in this case both preload and runonce must be off
             self._dorunonce = False
@@ -1174,6 +1174,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         self._init_stcount()
 
         self.runningstrats = runstrats = list()
+        # @tuando: start the store of Iteractive Broker (or any)
         for store in self.stores:
             store.start()
 
@@ -1297,12 +1298,15 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     self._timers.append(timer)
 
             if self._dopreload and self._dorunonce:
+                # @tuando: this is runonce for backtesting
                 if self.p.oldsync:
                     self._runonce_old(runstrats)
                 else:
                     # @tuando: GUESS: everything is handle by _runonce
                     self._runonce(runstrats)
             else:
+                # @tuando: this is runext for live trading
+                print('liveeeeeeeeeee')
                 if self.p.oldsync:
                     self._runnext_old(runstrats)
                 else:

@@ -334,6 +334,7 @@ class LineBuffer(LineSingle):
         if self.useislice:
             return list(islice(self.array, start, end))
         # @tuando: how can the array of Observer have data?
+        # @tuando: array of Observer have data from next() function in Observer
         return self.array[start:end]
 
     def oncebinding(self):  # @tuando: didn't reasearch this yet

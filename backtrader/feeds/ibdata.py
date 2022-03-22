@@ -114,7 +114,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
           - 'TRADES' for any other
 
         Use 'ASK' for the Ask quote of cash assets
-        
+
         Check the IB API docs if another value is wished
 
       - ``rtbar`` (default: ``False``)
@@ -265,6 +265,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
     def setenvironment(self, env):
         '''Receives an environment (cerebro) and passes it over to the store it
         belongs to'''
+        # @tuando: env is the Cerebro
         super(IBData, self).setenvironment(env)
         env.addstore(self.ib)
 
@@ -510,7 +511,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                         self.reqdata()  # resubscribe
                     continue
 
-                elif msg == -10225:  # Bust event occurred, current subscription is deactivated.
+                # Bust event occurred, current subscription is deactivated.
+                elif msg == -10225:
                     self._subcription_valid = False
                     if not self._statelivereconn:
                         self._statelivereconn = self.p.backfill

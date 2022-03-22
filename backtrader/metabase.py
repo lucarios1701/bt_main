@@ -195,6 +195,9 @@ class AutoInfoClass(object):
         return tuple(cls._getpairs().items())
 
     def _getkwargs(self, skip_=False):
+        # @tuando: because the 'plotline' of 'trades.py' is created each items
+        # as a class which save those value. For the reason that if we wanna
+        # get the value we call getattr(self, x) to access the value inside
         l = [
             (x, getattr(self, x))
             for x in self._getkeys() if not skip_ or not x.startswith('_')]

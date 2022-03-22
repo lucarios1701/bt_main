@@ -61,6 +61,7 @@ class BuySell(Observer):
         buy = list()
         sell = list()
 
+        # @tuando: _owner is the Strategy
         for order in self._owner._orderspending:
             if order.data is not self.data or not order.executed.size:
                 continue
