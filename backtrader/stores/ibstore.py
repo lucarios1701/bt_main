@@ -89,6 +89,9 @@ class MetaSingleton(MetaParams):
         cls._singleton = None
 
     def __call__(cls, *args, **kwargs):
+        # @tuando - guess: need to have singleton, because when IBStore __init__
+        # twice, the ib.ibConnect().connect() will be False -> just only can be
+        # initiate once
         if cls._singleton is None:
             cls._singleton = (
                 super(MetaSingleton, cls).__call__(*args, **kwargs))
@@ -258,9 +261,13 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.conn.registerAll(self.watcher)
 
         # Register decorated methods with the conn
+        # @tuando: inspect.getmembers get all the function of self then return
+        # if inspect.ismethod return True
         methods = inspect.getmembers(self, inspect.ismethod)
         for name, method in methods:
+            # @tuando: get all the decorators in this module of ibstore
             if not getattr(method, '_ibregister', False):
+                # @tuando: if its not decorators so pass
                 continue
 
             message = getattr(ibopt.message, name)
@@ -296,6 +303,8 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.revdur[barsize].sort(key=key2fn)
 
     def start(self, data=None, broker=None):
+        # @tuando - guess: when _runnext was called, reconnect will check ultil
+        # IB is connected then continue
         self.reconnect(fromstart=True)  # reconnect should be an invariant
 
         # Datas require some processing to kickstart data reception
@@ -362,13 +371,14 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         try:
             if self.conn.isConnected():
                 if resub:
+                    # @tuando: call startdatas to call reqdata to load msg from ib
                     self.startdatas()
                 return True  # nothing to do
         except AttributeError:
             # Not connected, several __getattr__ indirections to
             # self.conn.sender.client.isConnected
+            # @tuando - guess: when the first connect Attr error
             firstconnect = True
-
         if self.dontreconnect:
             return False
 
@@ -378,20 +388,21 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         if retries >= 0:
             retries += firstconnect
 
+        # @tuando: retries gonna be decrease everytime retry, maximum 3 times
+        # retry of self.p.reconnect
         while retries < 0 or retries:
             if not firstconnect:
                 time.sleep(self.p.timeout)
 
             firstconnect = False
-
             if self.conn.connect():
                 if not fromstart or resub:
                     self.startdatas()
                 return True  # connection successful
-
             if retries > 0:
                 retries -= 1
 
+        # @tuando: when 3 times try exceed, dont reconnect again and stop
         self.dontreconnect = True
         return False  # connection/reconnection failed
 
@@ -609,7 +620,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
             self.qs[tickerId] = q  # can be managed from other thread
             self.ts[q] = tickerId
             self.iscash[tickerId] = False
-
         return tickerId, q
 
     def cancelQueue(self, q, sendnone=False):
@@ -894,7 +904,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
         the IB API) following the BID price
 
         A RTVolume which will only contain a price is put into the client's
-        queue to have a consistent cross-market interface
+        queue to have a consistent cross-market int`erface
         '''
         # Used for "CASH" markets
         # The price field has been seen to be missing in some instances even if
@@ -1273,7 +1283,6 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     def makecontract(self, symbol, sectype, exch, curr,
                      expiry='', strike=0.0, right='', mult=1):
         '''returns a contract from the parameters without check'''
-
         contract = Contract()
         contract.m_symbol = bytes(symbol)
         contract.m_secType = bytes(sectype)

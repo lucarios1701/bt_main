@@ -26,6 +26,9 @@ import datetime
 import inspect
 import io
 import os.path
+from tkinter import E
+
+from numpy import random
 
 import backtrader as bt
 from backtrader import (date2num, num2date, time2num, TimeFrame, dataseries,
@@ -221,6 +224,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         dt = self.lines.datetime[0]
         dtime = num2date(dt)
         if self._calendar is None:
+            # TUANDOOO NEED TO REVIEW BECAUSE DIDNT RESEARCH THIS yet
             nexteos = datetime.datetime.combine(dtime, self.p.sessionend)
             nextdteos = self.date2num(nexteos)  # locl'ed -> utc-like
             nexteos = num2date(nextdteos)  # utc
@@ -275,6 +279,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
     def put_notification(self, status, *args, **kwargs):
         '''Add arguments to notification queue'''
+        # @tuando: because by default _laststatus is CONNECTED, so if data connect
+        # it wont append to notifs and wont notify
         if self._laststatus != status:
             self.notifs.append((status, args, kwargs))
             self._laststatus = status
@@ -304,6 +310,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
     def start(self):
         self._barstack = collections.deque()
         self._barstash = collections.deque()
+        # @tuando: _laststatus for live trading status
         self._laststatus = self.CONNECTED
 
     def stop(self):
@@ -331,7 +338,11 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
     def addfilter(self, p, *args, **kwargs):
         if inspect.isclass(p):
+            # @tuando: self, is the data, so call p(self) will add data to Resampler
             pobj = p(self, *args, **kwargs)
+            # @tuando: add the Resampler class to the _filters for processing
+            # live data in load() - pobj is Resampler was added by resample function
+            # in Cerebro
             self._filters.append((pobj, [], {}))
 
             if hasattr(pobj, 'last'):
@@ -410,6 +421,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
             # not preloaded - request next bar
             ret = self.load()
+            # @tuando: if live data return None or not return then return ret
+            # is None
             if not ret:
                 # if load cannot produce bars - forward the result
                 return ret
@@ -476,12 +489,12 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         while True:
             # move data pointer forward for new bar
             self.forward()
-
             if self._fromstack():  # bar is available
                 return True
 
             if not self._fromstack(stash=True):
                 _loadret = self._load()
+                # @tuando: while the queue in _load return empty, continue
                 if not _loadret:  # no bar use force to make sure in exactbars
                     # the pointer is undone this covers especially (but not
                     # uniquely) the case in which the last bar has been seen
@@ -526,6 +539,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                         self._fromstack(forward=True)
                         retff = ff(self, *fargs, **fkwargs)
                 else:
+                    # @tuando: ff is Resampler class in resamplerfilter.py
                     retff = ff(self, *fargs, **fkwargs)
 
                 if retff:  # bar removed from systemn
@@ -580,21 +594,19 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
         Returns True if values are present, False otherwise
         '''
-
         coll = self._barstack if not stash else self._barstash
-
         if coll:
             if forward:
                 self.forward()
 
             for line, val in zip(self.itersize(), coll.popleft()):
                 line[0] = val
-
             return True
 
         return False
 
     def resample(self, **kwargs):
+        # @tuando: add Resampler to _filters
         self.addfilter(Resampler, **kwargs)
 
     def replay(self, **kwargs):
@@ -646,8 +658,8 @@ class MetaCSVDataBase(DataBase.__class__):
         if not _obj.p.name and not _obj._name:
             _obj._name, _ = os.path.splitext(os.path.basename(_obj.p.dataname))
 
-        _obj, args, kwargs = \
-            super(MetaCSVDataBase, cls).dopostinit(_obj, *args, **kwargs)
+        _obj, args, kwargs = super(MetaCSVDataBase, cls).dopostinit(
+            _obj, *args, **kwargs)
 
         return _obj, args, kwargs
 

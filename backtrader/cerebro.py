@@ -25,6 +25,7 @@ import datetime
 import collections
 import itertools
 import multiprocessing
+from tkinter import E
 
 import backtrader as bt
 from .utils.py3 import (map, range, zip, with_metaclass, string_types,
@@ -836,6 +837,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         '''
         if any(dataname is x for x in self.datas):
             dataname = dataname.clone()
+        # @tuando: call resample function of feed.py for adding Resampler class
         dataname.resample(**kwargs)
         self.adddata(dataname, name=name)
         self._doreplay = True
@@ -1306,7 +1308,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     self._runonce(runstrats)
             else:
                 # @tuando: this is runext for live trading
-                print('liveeeeeeeeeee')
                 if self.p.oldsync:
                     self._runnext_old(runstrats)
                 else:
@@ -1516,14 +1517,17 @@ class Cerebro(with_metaclass(MetaParams, object)):
         Actual implementation of run in full next mode. All objects have its
         ``next`` method invoke on each data arrival
         '''
+        # @tuando: for multiple asset
         datas = sorted(self.datas,
                        key=lambda x: (x._timeframe, x._compression))
         datas1 = datas[1:]
+        # @tuando: data 0 is the first asset
         data0 = datas[0]
         d0ret = True
 
         rs = [i for i, x in enumerate(datas) if x.resampling]
         rp = [i for i, x in enumerate(datas) if x.replaying]
+
         rsonly = [i for i, x in enumerate(datas)
                   if x.resampling and not x.replaying]
         onlyresample = len(datas) == len(rsonly)
@@ -1536,7 +1540,9 @@ class Cerebro(with_metaclass(MetaParams, object)):
         dt0 = date2num(datetime.datetime.max) - 2  # default at max
         while d0ret or d0ret is None:
             # if any has live data in the buffer, no data will wait anything
+            # @tuando: any for any data in datas have data comming
             newqcheck = not any(d.haslivedata() for d in datas)
+            # @tuando: check live data have message or not
             if not newqcheck:
                 # If no data has reached the live status or all, wait for
                 # the next incoming data
@@ -1546,6 +1552,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
             lastret = False
             # Notify anything from the store even before moving datas
             # because datas may not move due to an error reported by the store
+            # @tuando: use to notify when live streaming running
             self._storenotify()
             if self._event_stop:  # stop if requested
                 return
@@ -1559,16 +1566,23 @@ class Cerebro(with_metaclass(MetaParams, object)):
             qstart = datetime.datetime.utcnow()
             for d in datas:
                 qlapse = datetime.datetime.utcnow() - qstart
+                # @tuando - guess: update qcheck for calling msg ib
                 d.do_qcheck(newqcheck, qlapse.total_seconds())
+                # @tuando: call next of data to load realtime data to self.lines....
                 drets.append(d.next(ticks=False))
 
+            # @tuando: drets only save True or False, for each asset
+            # False: Queue of _load is empty => no data
+            # True: data arrived
             d0ret = any((dret for dret in drets))
             if not d0ret and any((dret is None for dret in drets)):
                 d0ret = None
 
+            # @tuando: if d0ret is True means that at least 1 asset had data
             if d0ret:
                 dts = []
                 for i, ret in enumerate(drets):
+                    raise Exception(datas[i].datetime.lencount)
                     dts.append(datas[i].datetime[0] if ret else None)
 
                 # Get index to minimum datetime
@@ -1578,6 +1592,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     dt0 = min((d for i, d in enumerate(dts)
                                if d is not None and i not in rsonly))
 
+                # @tuando: dts.index(dt0) will return the position of data of asset
+                # then will select the data of them to dmaster
                 dmaster = datas[dts.index(dt0)]  # and timemaster
                 self._dtmaster = dmaster.num2date(dt0)
                 self._udtmaster = num2date(dt0)
@@ -1587,7 +1603,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 for i, ret in enumerate(drets):
                     if ret:  # dts already contains a valid datetime for this i
                         continue
-
                     # try to get a data by checking with a master
                     d = datas[i]
                     d._check(forcedata=dmaster)  # check to force output

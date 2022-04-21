@@ -109,6 +109,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
     )
 
     def __init__(self, data):
+        # @tuando: in the version of test_7th, timeframe is Second, so the subdays
+        # returns True
         self.subdays = TimeFrame.Ticks < self.p.timeframe < TimeFrame.Days
         self.subweeks = self.p.timeframe < TimeFrame.Weeks
         self.componly = (not self.subdays and
@@ -135,7 +137,6 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         # new data at position 0, still untouched from stream
         if not self.subdays:
             return False
-
         # Time already delivered
         return len(data) > 1 and data.datetime[0] <= data.datetime[-1]
 
@@ -216,7 +217,8 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
     def _barover_weeks(self, data):
         if self.data._calendar is None:
-            year, week, _ = data.num2date(self.bar.datetime).date().isocalendar()
+            year, week, _ = data.num2date(
+                self.bar.datetime).date().isocalendar()
             yearweek = year * 100 + week
 
             baryear, barweek, _ = data.datetime.date().isocalendar()
@@ -249,6 +251,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         point = tm.hour * 60 + tm.minute
         restpoint = 0
 
+        # @tuando: calculate and return the time point following timeframe
         if self.p.timeframe < TimeFrame.Minutes:
             point = point * 60 + tm.second
 
@@ -344,6 +347,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
                 return False, True  # cannot be on boundary, subunits present
 
             # Pass through compression to get boundary and rest over boundary
+            # @tuando - guess: this will check the point is divisible to compression
             bound, brest = divmod(point, self.p.compression)
 
             # if no extra and decomp bound is point
@@ -485,7 +489,6 @@ class Resampler(_BaseResampler):
         if self.bar.isopen():
             if self.doadjusttime:
                 self._adjusttime()
-
             data._add2stack(self.bar.lvalues())
             self.bar.bstart(maxdate=True)  # close the bar to avoid dups
             return True
@@ -502,7 +505,6 @@ class Resampler(_BaseResampler):
                 if not self.p.takelate:
                     data.backwards()
                     return True  # get a new bar
-
                 self.bar.bupdate(data)  # update new or existing bar
                 # push time beyond reference
                 self.bar.datetime = data.datetime[-1] + 0.000001
@@ -518,6 +520,7 @@ class Resampler(_BaseResampler):
                 onedge, docheckover = self._dataonedge(data)  # for subdays
                 consumed = onedge
 
+        # @tuando - guess: this means data feed meet the compression
         if consumed:
             self.bar.bupdate(data)  # update new or existing bar
             data.backwards()  # remove used bar

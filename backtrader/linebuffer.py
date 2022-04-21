@@ -162,6 +162,7 @@ class LineBuffer(LineSingle):
     # @tuando: this will be called if call (e.g instance[0] of LineBuffer)
     # @tuando: the returned self.idx will call get_idx in @property defined above
     def __getitem__(self, ago):
+        print(self.array)
         return self.array[self.idx + ago]
 
     def get(self, ago=0, size=1):

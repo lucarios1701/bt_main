@@ -196,7 +196,6 @@ class _Bar(AutoOrderedDict):
             self.bstart()
 
         self.datetime = data.datetime[0]
-
         self.high = max(self.high, data.high[0])
         self.low = min(self.low, data.low[0])
         self.close = data.close[0]
@@ -205,6 +204,7 @@ class _Bar(AutoOrderedDict):
         self.openinterest = data.openinterest[0]
 
         o = self.open
+        # @tuando o==o False if NaN
         if reopen or not o == o:
             self.open = data.open[0]
             return True  # just opened the bar

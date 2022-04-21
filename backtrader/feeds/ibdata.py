@@ -270,6 +270,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         env.addstore(self.ib)
 
     def parsecontract(self, dataname):
+        # @tuando: only parse the contract to match with IB
         '''Parses dataname generates a default contract'''
         # Set defaults for optional tokens in the ticker string
         if dataname is None:
@@ -369,9 +370,9 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         self._subcription_valid = False  # subscription state
         self._storedmsg = dict()  # keep pending live message (under None)
 
+        # @tuando: if IB is connected so continued and put_notification as CONNECTED
         if not self.ib.connected():
             return
-
         self.put_notification(self.CONNECTED)
         # get real contract details with real conId (contractId)
         cds = self.ib.getContractDetails(self.precontract, maxcount=1)
@@ -440,6 +441,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
         if self.contract is None or self._state == self._ST_OVER:
             return False  # nothing can be done
 
+        # @tuando - guess: this while loop will process live data streaming and
+        # put notifications
         while True:
             if self._state == self._ST_LIVE:
                 try:
@@ -474,7 +477,6 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
 
                     self._statelivereconn = False
                     continue  # to reenter the loop and hit st_historback
-
                 if msg is None:  # Conn broken during historical/backfilling
                     self._subcription_valid = False
                     self.put_notification(self.CONNBROKEN)
@@ -526,15 +528,21 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     continue
 
                 # Process the message according to expected return type
+                # @tuando - guess: this will load bar for live
                 if not self._statelivereconn:
                     if self._laststatus != self.LIVE:
                         if self.qlive.qsize() <= 1:  # very short live queue
+                            # @tuando: change _laststatus to LIVE to run live
+                            # streaming after historical done
                             self.put_notification(self.LIVE)
 
                     if self._usertvol:
                         ret = self._load_rtvolume(msg)
                     else:
                         ret = self._load_rtbar(msg)
+
+                    # @tuando - guess: check the message returned or not, if returned
+                    # return else continuing to load more
                     if ret:
                         return True
 
@@ -596,6 +604,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                     continue
 
                 if msg.date is not None:
+                    # @tuando: this will load bar for historical
                     if self._load_rtbar(msg, hist=True):
                         return True  # loading worked
 
@@ -651,6 +660,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             return True  # continue before
 
         # Live is requested
+        # @tuando: this will call reconnect with resub to call startdatas in
+        # ibstore the call reqdata of ibstore
         if not self.ib.reconnect(resub=True):
             self.put_notification(self.DISCONNECTED)
             self._state = self._ST_OVER
@@ -661,6 +672,7 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
             self.put_notification(self.DELAYED)
 
         self._state = self._ST_LIVE
+
         return True  # no return before - implicit continue
 
     def _load_rtbar(self, rtbar, hist=False):
