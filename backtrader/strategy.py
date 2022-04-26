@@ -339,12 +339,14 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def _clk_update(self):
         if self._oldsync:
+            # @tuando: only _oldsync super _clk_update()
             clk_len = super(Strategy, self)._clk_update()
             self.lines.datetime[0] = max(d.datetime[0]
                                          for d in self.datas if len(d))
             return clk_len
 
         newdlens = [len(d) for d in self.datas]
+        # @tuando: this foward is foward fo the lens of Strategy, update from data
         if any(nl > l for l, nl in zip(self._dlens, newdlens)):
             self.forward()
 

@@ -1582,7 +1582,6 @@ class Cerebro(with_metaclass(MetaParams, object)):
             if d0ret:
                 dts = []
                 for i, ret in enumerate(drets):
-                    raise Exception(datas[i].datetime.lencount)
                     dts.append(datas[i].datetime[0] if ret else None)
 
                 # Get index to minimum datetime

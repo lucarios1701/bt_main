@@ -543,6 +543,7 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                     retff = ff(self, *fargs, **fkwargs)
 
                 if retff:  # bar removed from systemn
+                    # @tuando: this break for the for loop
                     break  # out of the inner loop
 
             if retff:  # bar removed from system - loop to get new bar

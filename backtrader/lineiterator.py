@@ -269,6 +269,8 @@ class LineIterator(with_metaclass(MetaLineIterator, LineSeries)):
     bind2line = bind2lines
 
     def _next(self):
+        # @tuando: in live trading, call only _clk_update() of Strategy not of
+        # lineiterator to update the len of data by foward
         clock_len = self._clk_update()
 
         for indicator in self._lineiterators[LineIterator.IndType]:

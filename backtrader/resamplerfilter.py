@@ -23,6 +23,8 @@ from __future__ import (absolute_import, division, print_function,
 
 
 from datetime import datetime, date, timedelta
+from shutil import ExecError
+from tkinter import E
 
 from .dataseries import TimeFrame, _Bar
 from .utils.py3 import with_metaclass
@@ -146,7 +148,6 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         isover = False
         if not self.componly and not self._barover(chkdata):
             return isover
-
         if self.subdays and self.p.bar2edge:
             isover = True
         elif not fromcheck:  # fromcheck doesn't increase compcount
@@ -164,6 +165,7 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             # Ticks is already the lowest level
             return self.bar.isopen()
 
+        # @tuando - guess: compare data with TimeFrame to resample live data tick
         elif tframe < TimeFrame.Days:
             return self._barover_subdays(data)
 
@@ -272,15 +274,19 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
 
         if data.datetime[0] < self.bar.datetime:
             return False
-
         # Get time objects for the comparisons - in utc-like format
+        # @tuando - guess: tm is datetime of _Bar class which was save and update
+        # before
         tm = num2date(self.bar.datetime).time()
+        # @tuando: - guess: bartm is the realtime bar of streaming
         bartm = num2date(data.datetime[0]).time()
 
         point, _ = self._gettmpoint(tm)
         barpoint, _ = self._gettmpoint(bartm)
 
         ret = False
+        # @tuando - guess: if point of data greater than point of bar in _Bar, then
+        # update
         if barpoint > point:
             # The data bar has surpassed the internal bar
             if not self.p.bar2edge:
@@ -360,7 +366,6 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
             bdtime = data.datetime.datetime()
             bsend = datetime.combine(bdtime.date(), data.p.sessionend)
             return bdtime == bsend
-
         return False, True  # subweeks, not subdays and not sessionend
 
     def _calcadjtime(self, greater=False):
@@ -530,6 +535,9 @@ class Resampler(_BaseResampler):
         if cond:  # original is and, the 2nd term must also be true
             if not onedge:  # onedge true is sufficient
                 if docheckover:
+                    # @tuando: when live streaming intraday data, if timeframe
+                    # met the compression, then cond return True, else False,
+                    # if True add bar have data in _Bar to stack of 'data'
                     cond = self._checkbarover(data, fromcheck=fromcheck,
                                               forcedata=forcedata)
         if cond:
@@ -550,13 +558,21 @@ class Resampler(_BaseResampler):
 
             if dodeliver:
                 if not onedge and self.doadjusttime:
+                    # @tuando - guess: adjust time throught self.ar.datetime to
+                    # meet the compression time in live
+                    # @tuando - guess: when the data meet the compression, then
+                    # data are added to stack, then load to line in data
                     self._adjusttime(greater=True, forcedata=forcedata)
-
                 data._add2stack(self.bar.lvalues())
                 self.bar.bstart(maxdate=True)  # bar delivered -> restart
 
         if not fromcheck:
+            # @tuando - guess: this means data feed meet the compression
+            # @tuando- - guess: this will update OHLC from intraday to bar data
             if not consumed:
+                # @tuando - guess: because data is forward in def load() of feed
+                # so have to backwards here because data are not loaded when didnt
+                # meet the compression
                 self.bar.bupdate(data)  # update new or existing bar
                 data.backwards()  # remove used bar
 
