@@ -330,6 +330,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         else:
             self.prenext()
 
+        # @tuando: this will call the next of analyzers then do transmit data to
+        # analyzers
         self._next_analyzers(minperstatus, once=True)
         # @tuando: this will call the next of Observers then do data transmit to
         # Observer lines (e.g 'cash', 'value' in case of broker observer)
@@ -414,7 +416,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
 
     def _start(self):
         self._periodset()
-
+        # @tuando: call the _start of analyzer for analyzing results as Pyfolio
         for analyzer in itertools.chain(self.analyzers, self._slave_analyzers):
             analyzer._start()
 
@@ -607,7 +609,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         if quicknotify:
             self._notify(qorders=qorders, qtrades=qtrades)
 
-    # @tuando: _notify is called at _oncepost, however oncepost is called after _brokernotify which have broker 'next'
+    # @tuando: _notify is called at _oncepost, however oncepost is called after
+    #  _brokernotify which have broker 'next'
     def _notify(self, qorders=[], qtrades=[]):
         if self.cerebro.p.quicknotify:
             # need to know if quicknotify is on, to not reprocess pendingorders
@@ -622,6 +625,8 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
         for order in procorders:
             if order.exectype != order.Historical or order.histnotify:  # @tuando: doesn't verify this condition yet
                 self.notify_order(order)
+            # @tuando: calling notify_order of analyzer to update data for
+            # analyzers
             for analyzer in itertools.chain(self.analyzers,
                                             self._slave_analyzers):
                 analyzer._notify_order(order)
@@ -1351,13 +1356,19 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             comminfo = self.broker.getcommissioninfo(data)
 
             # Make sure a price is there
+            # @tuando: if the price is not given, default take the nearest
+            # data.close
             price = price if price is not None else data.close[0]
 
             if target > value:
+                # @tuando: buy when total percentage of asset greater than
+                # the amount we are owning
                 size = comminfo.getsize(price, target - value)
                 return self.buy(data=data, size=size, price=price, **kwargs)
 
             elif target < value:
+                # @tuando: sell when total percentage of asset smaller than
+                # the amount we are owning
                 size = comminfo.getsize(price, value - target)
                 return self.sell(data=data, size=size, price=price, **kwargs)
 
@@ -1407,6 +1418,7 @@ class Strategy(with_metaclass(MetaStrategy, StrategyBase)):
             data = self.data
 
         possize = self.getposition(data, self.broker).size
+        # @tuando: target * broker value will transform percent to cash value
         target *= self.broker.getvalue()
 
         return self.order_target_value(data=data, target=target, **kwargs)

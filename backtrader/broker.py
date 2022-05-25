@@ -95,7 +95,7 @@ class BrokerBase(with_metaclass(MetaBroker, object)):
         If name is ``None``, this will be the default for assets for which no
         other ``CommissionInfo`` scheme can be found
         '''
-        # @tuando: commission scheme will be added to ComminfoBase. The other 
+        # @tuando: commission scheme will be added to ComminfoBase. The other
         # scheme want to use commission scheme of the assets, get from here
         comm = CommInfoBase(commission=commission, margin=margin, mult=mult,
                             commtype=commtype, stocklike=stocklike,

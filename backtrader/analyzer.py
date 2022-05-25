@@ -39,6 +39,8 @@ class MetaAnalyzer(bt.MetaParams):
         # Create the object and set the params in place
         _obj, args, kwargs = super(MetaAnalyzer, cls).donew(*args, **kwargs)
 
+        # @tuando - guess: as an attr of metaclass, _children is updated and save
+        # the values
         _obj._children = list()
 
         _obj.strategy = strategy = bt.metabase.findowner(_obj, bt.Strategy)
@@ -52,6 +54,7 @@ class MetaAnalyzer(bt.MetaParams):
         _obj.datas = strategy.datas
 
         # For each data add aliases: for first data: data and data0
+        # @tuando: add aliases for data, data0 was created here
         if _obj.datas:
             _obj.data = data = _obj.datas[0]
 
@@ -79,6 +82,8 @@ class MetaAnalyzer(bt.MetaParams):
         _obj, args, kwargs = \
             super(MetaAnalyzer, cls).dopostinit(_obj, *args, **kwargs)
 
+        # @tuando - guess: if parent is not None mean we found the owner of
+        # Analyze
         if _obj._parent is not None:
             _obj._parent._register(_obj)
 
@@ -176,6 +181,8 @@ class Analyzer(with_metaclass(MetaAnalyzer, object)):
         self.notify_order(order)
 
     def _nextstart(self):
+        # @tuando - guess: this will call _nextstart() of the children like
+        # timereturn, grossover, .....
         for child in self._children:
             child._nextstart()
 
@@ -323,9 +330,12 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
             self.prenext()
 
     def _nextstart(self):
+        # @tuando: TimeReturn doesnt have children then self._children = []
         for child in self._children:
             child._nextstart()
 
+        # @tuando: call for the data pass over to update value of each data pass
+        # over
         if self._dt_over() or not self.p._doprenext:  # exec if no prenext
             self.on_dt_over()
 
@@ -335,6 +345,8 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
         for child in self._children:
             child._next()
 
+        # @tuando: call for the data pass over to update value of each data pass
+        # over
         if self._dt_over():
             self.on_dt_over()
 
@@ -378,6 +390,7 @@ class TimeFrameAnalyzerBase(with_metaclass(MetaTimeFrameAnalyzerBase,
             dtkey = datetime.datetime(sunday.year, sunday.month, sunday.day)
 
         elif self.timeframe == TimeFrame.Days:
+            # @tuando: convert dt to number (e.g 2000-12-22 to 20001222)
             dtcmp = dt.year * 10000 + dt.month * 100 + dt.day
             dtkey = datetime.datetime(dt.year, dt.month, dt.day)
 

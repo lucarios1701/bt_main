@@ -144,7 +144,8 @@ class Lines(object):  # @tuando: 'Lines' is a based class temporarily save the i
         else:  # overriding lines, skip anything from baseclasses
             baselines = ()
             baseextralines = 0
-        # @tuando: 'baselines' and 'lines' save all the infor mation of 'lines' attr then update to new class
+        # @tuando: 'baselines' and 'lines' save all the infor mation of 'lines'
+        # attr then update to new class
         clslines = baselines + lines
         clsextralines = baseextralines + extralines
         # @tuando: the diff of this with clslines is lines2add save only new lines

@@ -115,6 +115,8 @@ class MetaDataTrades(Observer.__class__):
 
         # Recreate the lines dynamically
         if _obj.params.usenames:
+            # @tuando: save all the data name of asset - guess for create each
+            # unique class for each asset data
             lnames = tuple(x._name for x in _obj.datas)
         else:
             lnames = tuple('data{}'.format(x) for x in range(len(_obj.datas)))

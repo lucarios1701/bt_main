@@ -77,6 +77,8 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
     def _stage1(self):
         self._opstage = 1
 
+    # @tuando - guess: stage2 for processing datafeed, handle magic method of
+    # LineRoot
     def _stage2(self):
         self._opstage = 2
 
@@ -211,7 +213,6 @@ class LineRoot(with_metaclass(MetaLineRoot, object)):
         # operation(float, other) ... expecting other to be a float
         if r:
             return operation(other, self[0])
-
         return operation(self[0], other)
 
     def _operationown_stage2(self, operation):

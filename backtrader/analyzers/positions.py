@@ -69,6 +69,7 @@ class PositionsValue(bt.Analyzer):
         if self.p.headers:
             headers = [d._name or 'Data%d' % i
                        for i, d in enumerate(self.datas)]
+            # @tuando: create column's name for position dataframe
             self.rets['Datetime'] = headers + ['cash'] * self.p.cash
 
         tf = min(d._timeframe for d in self.datas)
@@ -79,6 +80,8 @@ class PositionsValue(bt.Analyzer):
         if self.p.cash:
             pvals.append(self.strategy.broker.get_cash())
 
+        # @tuando: _usedate to distinguish between date data and lower dataframe
+        # to call and indexing dataframe of positions
         if self._usedate:
             self.rets[self.strategy.datetime.date()] = pvals
         else:

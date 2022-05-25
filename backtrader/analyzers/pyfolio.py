@@ -87,12 +87,17 @@ class PyFolio(bt.Analyzer):
         dtfcomp = dict(timeframe=self.p.timeframe,
                        compression=self.p.compression)
 
+        # @tuando: guess, when below instances are called when Pyfolio initicated
+        # then it gonna be added to self._parent in analyzer.py, then will be called
+        # with _oncepost in strategy in the loop of reading data and backtest
         self._returns = TimeReturn(**dtfcomp)
         self._positions = PositionsValue(headers=True, cash=True)
         self._transactions = Transactions(headers=True)
         self._gross_lev = GrossLeverage()
 
     def stop(self):
+        # @tuando - guess: stop() will be called after backtest's loop done
+        # and before get_pf_items
         super(PyFolio, self).stop()
         self.rets['returns'] = self._returns.get_analysis()
         self.rets['positions'] = self._positions.get_analysis()
@@ -118,6 +123,7 @@ class PyFolio(bt.Analyzer):
 
         #
         # Returns
+        # @tuando - guess: create dataframe to save returns
         cols = ['index', 'return']
         returns = DF.from_records(iteritems(self.rets['returns']),
                                   index=cols[0], columns=cols)
@@ -126,6 +132,7 @@ class PyFolio(bt.Analyzer):
         rets = returns['return']
         #
         # Positions
+        # @tuando - guess: create blank dataframe to save positions
         pss = self.rets['positions']
         ps = [[k] + v[-2:] for k, v in iteritems(pss)]
         cols = ps.pop(0)  # headers are in the first entry
@@ -141,10 +148,12 @@ class PyFolio(bt.Analyzer):
         # for several assets. The dictionary has a single key and a list of
         # lists. Each sublist contains the fields of a transaction
         # Hence the double loop to undo the list indirection
+        # @tuando: append each rows of transactions to list
         for k, v in iteritems(txss):
             for v2 in v:
                 txs.append([k] + v2)
 
+        # @tuando: pop the header to create transactions dataframe
         cols = txs.pop(0)  # headers are in the first entry
         transactions = DF.from_records(txs, index=cols[0], columns=cols)
         transactions.index = pandas.to_datetime(transactions.index)

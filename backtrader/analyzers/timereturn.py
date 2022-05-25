@@ -20,6 +20,7 @@
 ###############################################################################
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+from shutil import ExecError
 
 from backtrader import TimeFrameAnalyzerBase
 
@@ -110,6 +111,8 @@ class TimeReturn(TimeFrameAnalyzerBase):
                 self._lastvalue = self.strategy.broker.fundvalue
 
     def notify_fund(self, cash, value, fundvalue, shares):
+        # @tuando: notify_fun will be called in notify of strategy then
+        # transfer data from strategy to analyzers
         if not self._fundmode:
             # Record current value
             if self.p.data is None:

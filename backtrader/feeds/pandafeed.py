@@ -21,6 +21,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+from matplotlib.cbook import to_filehandle
+
 from backtrader.utils.py3 import filter, string_types, integer_types
 
 from backtrader import date2num
@@ -132,7 +134,7 @@ class PandasData(feed.DataBase):
         - -1: autodetect
         - >= 0 or string: specific colum identifier
     '''
-
+    pass
     params = (
         ('nocase', True),
 
@@ -164,6 +166,7 @@ class PandasData(feed.DataBase):
         super(PandasData, self).__init__()
 
         # these "colnames" can be strings or numeric types
+        # @tuando: get the columns header of data
         colnames = list(self.p.dataname.columns.values)
         if self.p.datetime is None:
             # datetime is expected as index col and hence not returned
@@ -180,11 +183,15 @@ class PandasData(feed.DataBase):
         for datafield in self.getlinealiases():
             defmapping = getattr(self.params, datafield)
 
+            # @tuando: if defmapping < 0 means the columns of OHLC wasnt aligned,
+            # backtrader automatically detecting them
             if isinstance(defmapping, integer_types) and defmapping < 0:
                 # autodetection requested
                 for colname in colnames:
                     if isinstance(colname, string_types):
                         if self.p.nocase:
+                            # @tuando: find the matching column between dataname
+                            # column and from the params
                             found = datafield.lower() == colname.lower()
                         else:
                             found = datafield == colname
@@ -194,6 +201,8 @@ class PandasData(feed.DataBase):
                             break
 
                 if datafield not in self._colmapping:
+                    # @tuando: refill which column doesnt exist in DF data feed
+                    # with None
                     # autodetection requested and not found
                     self._colmapping[datafield] = None
                     continue
@@ -212,13 +221,20 @@ class PandasData(feed.DataBase):
             colnames = [x.lower() for x in self.p.dataname.columns.values]
         else:
             colnames = [x for x in self.p.dataname.columns.values]
-
         for k, v in self._colmapping.items():
             if v is None:
+                # @tuando: only datetime have value is None
                 continue  # special marker for datetime
+            # @tuando: above code assigne column string to the _colmapping with
+            # the name respectively, so the OHLC will go through this
             if isinstance(v, string_types):
                 try:
                     if self.p.nocase:
+                        # @tuando: get the order of column
+                        # @tuando - guess: automatically get the order of the OHLC
+                        # then mapping it with the default lines of this class,
+                        # if Strategy was not assigned the order of OHLC before.
+                        # it means autodetect the OHLC columns
                         v = colnames.index(v.lower())
                     else:
                         v = colnames.index(v)
@@ -228,12 +244,13 @@ class PandasData(feed.DataBase):
                         v = None
                     else:
                         raise e  # let user now something failed
-
             self._colmapping[k] = v
 
     def _load(self):
         self._idx += 1
 
+        # @tuando: dataname fed in is dataframe, if all data of asset loaded,
+        # start to the next data
         if self._idx >= len(self.p.dataname):
             # exhausted all rows
             return False
@@ -243,21 +260,25 @@ class PandasData(feed.DataBase):
             if datafield == 'datetime':
                 continue
 
+            # @tuando: get the index of column assigned before
             colindex = self._colmapping[datafield]
             if colindex is None:
                 # datafield signaled as missing in the stream: skip it
                 continue
 
             # get the line to be set
+            # @tuando: get the line to feed data into
             line = getattr(self.lines, datafield)
 
             # indexing for pandas: 1st is colum, then row
+            # @tuando: assigning data from pandas dataframe to right place
             line[0] = self.p.dataname.iloc[self._idx, colindex]
 
         # datetime conversion
         coldtime = self._colmapping['datetime']
 
         if coldtime is None:
+            # @tuando: asigning datetime data to datetime
             # standard index in the datetime
             tstamp = self.p.dataname.index[self._idx]
         else:

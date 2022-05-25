@@ -726,7 +726,6 @@ class CSVDataBase(with_metaclass(MetaCSVDataBase, DataBase)):
 
         line = line.rstrip('\n')
         linetokens = line.split(self.separator)
-
         return self._loadline(linetokens)
 
     def _getnextline(self):

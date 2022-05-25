@@ -1157,6 +1157,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     data.stop()
 
         if not self._dooptimize:
+            # @tuando - guess: if not do optimize, return the first strats
+            # in strats list not return a list
             # avoid a list of list for regular cases
             return self.runstrats[0]
 
@@ -1210,6 +1212,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
         # self._plotfillers2 = [list() for d in self.datas]
 
         if not predata:
+            # @tuando: preload data for each asset data
             for data in self.datas:
                 data.reset()
                 if self._exactbars < 1:  # datas can be full length
@@ -1257,6 +1260,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                     if self.p.oldtrades or len(self.datas) == 1:
                         strat._addobserver(False, observers.Trades)
                     else:
+                        # @tuando: for multiple
                         strat._addobserver(False, observers.DataTrades)
                 for multi, obscls, obsargs, obskwargs in self.observers:
                     strat._addobserver(multi, obscls, *obsargs, **obskwargs)
@@ -1304,7 +1308,7 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 if self.p.oldsync:
                     self._runonce_old(runstrats)
                 else:
-                    # @tuando: GUESS: everything is handle by _runonce
+                    # @tuando: GUESS: everything of backtest is handle by _runonce
                     self._runonce(runstrats)
             else:
                 # @tuando: this is runext for live trading
@@ -1691,8 +1695,10 @@ class Cerebro(with_metaclass(MetaParams, object)):
         # has not moved forward all datas/indicators/observers that
         # were homed before calling once, Hence no "need" to do it
         # here again, because pointers are at 0
-        # @tuando: this self.datas is list() was created for Cerebro to add data in 'adddata'
-
+        # @tuando: this self.datas is list() was created for Cerebro to add
+        # data in 'adddata'
+        # @tuando - guess: if key was not given, data will be sorted by price
+        # following __le__, __eq__, ... in LineRoot
         datas = sorted(self.datas,
                        key=lambda x: (x._timeframe, x._compression))  # @tuando: this data had data already because of loaded before
 

@@ -64,10 +64,12 @@ class Transactions(bt.Analyzer):
 
     def start(self):
         super(Transactions, self).start()
+        # @tuando: create header for transactions DF
         if self.p.headers:
             self.rets[self.p._pfheaders[0]] = [list(self.p._pfheaders[1:])]
 
         self._positions = collections.defaultdict(Position)
+        # @tuando: get the name of data
         self._idnames = list(enumerate(self.strategy.getdatanames()))
 
     def notify_order(self, order):
@@ -77,9 +79,13 @@ class Transactions(bt.Analyzer):
 
         # We use a fresh Position object for each round to get summary of what
         # the execution bits have done in that round
+        # @tuando: this will verify if Strategy have order or not,
+        # if the order exist, pass this and transfer data to 'pos'
         if order.status not in [Order.Partial, Order.Completed]:
             return  # It's not an execution
 
+        # @tuando - guess: add the name but self._positions doesnt have that
+        # items, so defaultdict will create new items with the name of data._name
         pos = self._positions[order.data._name]
         for exbit in order.executed.iterpending():
             if exbit is None:
@@ -100,4 +106,7 @@ class Transactions(bt.Analyzer):
         if entries:
             self.rets[self.strategy.datetime.datetime()] = entries
 
+        # @tuando: this will clear data in Position, after the order is
+        # executed. Then in the normal data feed it will return None in
+        # self._positions.get(dname, None)
         self._positions.clear()

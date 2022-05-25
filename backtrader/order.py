@@ -190,7 +190,8 @@ class OrderData(object):
 
     def addbit(self, exbit):
         # Stores an ExecutionBit and recalculates own values from ExBit
-        # @tuando - guess: exbits saves the execution infor for the purpose of query historical
+        # @tuando - guess: exbits saves the execution infor for the purpose 
+        # of query historical
         # @tuando: need to review when the exbit is added more than one
         self.exbits.append(exbit)
 

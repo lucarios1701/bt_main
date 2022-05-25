@@ -192,6 +192,8 @@ class CommInfoBase(with_metaclass(MetaParams)):
 
     def getsize(self, price, cash):
         '''Returns the needed size to meet a cash operation at a given price'''
+        # @tuando: _stocklike to determine margin or not
+        # @tuando: getsize to take the size of stock we wanna execute
         if not self._stocklike:
             return int(self.p.leverage * (cash // self.get_margin(price)))
 

@@ -410,9 +410,9 @@ class BackBroker(bt.BrokerBase):
         if datas is None:
             if mkt:
                 return self._valuemkt if not lever else self._valuemktlever
-
             return self._value if not lever else self._valuelever
-
+        # @tuando: when the analyzers (e.g positions) is called, data will be
+        # passed into this
         return self._get_value(datas=datas, lever=lever)
 
     getvalue = get_value
@@ -431,6 +431,8 @@ class BackBroker(bt.BrokerBase):
             self.cash += c
         for data in datas or self.positions:
             comminfo = self.getcommissioninfo(data)
+            # @tuando: this self.positions[data] will add the data to
+            # self.positions defaultdict
             position = self.positions[data]
             # use valuesize:  returns raw value, rather than negative adj val
             if not self.p.shortcash:
@@ -444,6 +446,8 @@ class BackBroker(bt.BrokerBase):
                 if lever and dvalue > 0:
                     dvalue -= dunrealized
                     return (dvalue / comminfo.get_leverage()) + dunrealized
+                # @tuando: this will return when calling in analyzer, dvalue
+                # only save the value of the stock (price * size)
                 return dvalue  # raw data value requested, short selling is neg
 
             if not self.p.shortcash:
@@ -511,8 +515,9 @@ class BackBroker(bt.BrokerBase):
         the given ``data``'''
         # print(self.positions[data])
         # print(self.positions, 'xxxxxxxx')
-        # @tuando: before the return, self.positions doesn't have position of data yet
-        # but it's created when the return 'self.positions[data]' was called by defaultdict
+        # @tuando: before the return, self.positions doesn't have position of
+        # data yet but it's created when the return 'self.positions[data]' was
+        # called by defaultdict
         return self.positions[data]
 
     def orderstatus(self, order):
@@ -576,11 +581,14 @@ class BackBroker(bt.BrokerBase):
 
             comminfo = self.getcommissioninfo(order.data)
 
-            # @tuando - guess: self.positions is Position class save the position info to execute
-            # @tuando - the Position.clone() creates a copy of Position class, update this instance doesn't change the original Position
+            # @tuando - guess: self.positions is Position class save the
+            # position info to execute
+            # @tuando - the Position.clone() creates a copy of Position class,
+            # update this instance doesn't change the original Position
             position = positions.setdefault(
                 order.data, self.positions[order.data].clone())  # @tuando: this will also add data to self.postions attr
-            # @tuando - guess: when we call position without parameter, the default one will return
+            # @tuando - guess: when we call position without parameter, the
+            # default one will return
 
             # pseudo-execute the order to get the remaining cash after exec
             # @tuando - guess: this executed is only used to check the cash enough for real execute or not
@@ -734,7 +742,8 @@ class BackBroker(bt.BrokerBase):
             pprice_orig = position.price
 
             # @tuando: price is the price updated on (e.g _try_exc_market...)
-            # @tuando - guess: this is pseudoupdate because is update on the new instance not the original Position class
+            # @tuando - guess: this is pseudoupdate because is update on the
+            # new instance not the original Position class
             psize, pprice, opened, closed = position.pseudoupdate(size, price)
 
             # if part/all of a position has been closed, then there has been
@@ -744,7 +753,8 @@ class BackBroker(bt.BrokerBase):
         else:
             pnl = 0
             if not self.p.coo:
-                # @tuando: when 'coo' is false means execute price at closed of t+0, which was set in order - init()
+                # @tuando: when 'coo' is false means execute price at closed
+                # of t+0, which was set in order - init()
                 price = pprice_orig = order.created.price
             else:
                 # When doing cheat on open, the price to be considered for a
@@ -818,7 +828,10 @@ class BackBroker(bt.BrokerBase):
                 openedvalue = openedcomm = 0.0
 
             elif ago is not None:  # real execution
-                # @tuando: psize > opened when this is not the first position was executed
+                # @tuando: psize > opened when this is not the first position
+                # was executed
+                # @tuando: it not just for the future. Need to review, when the
+                # 1st_strat test run it goes throught here
                 if abs(psize) > abs(opened):  # @tuando - guess: if not future, this hasn't used yet
                     # some futures were opened - adjust the cash of the
                     # previously existing futures to the operation price and
@@ -1271,6 +1284,8 @@ class BackBroker(bt.BrokerBase):
                 # record the last adjustment price
                 pos.adjbase = data.close[0]
 
+        # @tuando: this will call _get_value first in the next of broker, so then
+        # the self.positions of broker will be added data from this call
         self._get_value()  # update value
 
 
