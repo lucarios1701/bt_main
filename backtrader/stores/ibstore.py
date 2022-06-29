@@ -191,6 +191,7 @@ class IBStore(with_metaclass(MetaSingleton, object)):
     @classmethod
     def getdata(cls, *args, **kwargs):
         '''Returns ``DataCls`` with args, kwargs'''
+        # @tuando: cls.DataCls will be assign in the feeds.ibdata
         return cls.DataCls(*args, **kwargs)
 
     @classmethod

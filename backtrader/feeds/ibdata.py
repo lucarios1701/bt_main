@@ -22,6 +22,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import datetime
+from lib2to3.pgen2.token import RBRACE
 
 import backtrader as bt
 from backtrader.feed import DataBase
@@ -537,6 +538,8 @@ class IBData(with_metaclass(MetaIBData, DataBase)):
                             self.put_notification(self.LIVE)
 
                     if self._usertvol:
+                        # @tuando - guess: in ibstore, data will load to RTVolume
+                        # then msg = RTV
                         ret = self._load_rtvolume(msg)
                     else:
                         ret = self._load_rtbar(msg)

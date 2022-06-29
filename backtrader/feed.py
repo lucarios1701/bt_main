@@ -489,6 +489,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
         while True:
             # move data pointer forward for new bar
             self.forward()
+            # @tuando - guess: in the first round of loop, _fromstack didnt have
+            # bar yet so return False then conitnue the loop
             if self._fromstack():  # bar is available
                 return True
 
@@ -540,6 +542,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                         retff = ff(self, *fargs, **fkwargs)
                 else:
                     # @tuando: ff is Resampler class in resamplerfilter.py
+                    # @tuando - guess: each data point pass, the Resampler class
+                    # is initiated again
                     retff = ff(self, *fargs, **fkwargs)
 
                 if retff:  # bar removed from systemn
@@ -547,6 +551,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                     break  # out of the inner loop
 
             if retff:  # bar removed from system - loop to get new bar
+                # @tuando: if retff true the loop will go back to fromcheck to
+                # check the stack have data or not, the stack will be added data
+                # in Resampler (retff) if data met compression
                 continue  # in the greater loop
 
             # Checks let the bar through ... notify it
@@ -595,12 +602,15 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
 
         Returns True if values are present, False otherwise
         '''
+        # @tuando: in our research scope, self._barstash is still empty
         coll = self._barstack if not stash else self._barstash
         if coll:
             if forward:
                 self.forward()
 
             for line, val in zip(self.itersize(), coll.popleft()):
+                # @tuando: when data meet the compression bar, call _fromstack
+                # again in _load will update value for line
                 line[0] = val
             return True
 

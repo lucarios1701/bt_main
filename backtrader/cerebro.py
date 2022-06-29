@@ -760,7 +760,8 @@ class Cerebro(with_metaclass(MetaParams, object)):
         data.setenvironment(self)
 
         self.datas.append(data)
-        # @tuando: if the name was not given, so the datapath will be splitted  and refered to _name
+        # @tuando: if the name was not given, so the datapath will be splitted
+        #  and refered to _name
         self.datasbyname[data._name] = data
         feed = data.getfeed()
         if feed and feed not in self.feeds:
@@ -1635,6 +1636,10 @@ class Cerebro(with_metaclass(MetaParams, object)):
                 # meant for things like live feeds which may not produce a bar
                 # at the moment but need the loop to run for notifications and
                 # getting resample and others to produce timely bars
+
+                # @tuando - guess: if data point of streaming isnt return, but
+                # still need to check in that timeframe of compression, if doesnt
+                # have data still need to create a bar
                 for data in datas:
                     data._check()
             else:

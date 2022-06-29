@@ -143,6 +143,13 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         return len(data) > 1 and data.datetime[0] <= data.datetime[-1]
 
     def _checkbarover(self, data, fromcheck=False, forcedata=None):
+        # @tuando: datafaker is using when the drets is None then _runnext
+        # will call data._check(), this check will be called continuously in the
+        # loop for updating the datetime of realtim utcnow(). The reason of using
+        # DTFaker is it will keep track of datetime updating when meet the
+        # compression then producing new bar with data point coming or not,
+        # check _barover will check DTFaker with new datetime if data point
+        # is not come
         chkdata = DTFaker(data, forcedata) if fromcheck else data
 
         isover = False
@@ -279,6 +286,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
         # before
         tm = num2date(self.bar.datetime).time()
         # @tuando: - guess: bartm is the realtime bar of streaming
+        # @tuando: when data._check(), datetime of data will be the datetime
+        # of DTFaker, which will be updated as realtime utcnow(). The tm above
+        # is saved by the datetime of the last data point streaming came
         bartm = num2date(data.datetime[0]).time()
 
         point, _ = self._gettmpoint(tm)
@@ -300,6 +310,9 @@ class _BaseResampler(with_metaclass(metabase.MetaParams, object)):
                 barpoint_comp = barpoint // self.p.compression
 
                 # Went over boundary including compression
+                # @tuando: this means the barpoint of utcnow() is one-step
+                # greater than the last bar with a range of compression so
+                # return True for loading data to stack
                 if barpoint_comp > point_comp:
                     ret = True
 
@@ -525,7 +538,9 @@ class Resampler(_BaseResampler):
                 onedge, docheckover = self._dataonedge(data)  # for subdays
                 consumed = onedge
 
-        # @tuando - guess: this means data feed meet the compression
+        # @tuando - guess: this means data feed meet the compression, for the
+        # historical datafeed, because in live the timeframe is not divisible
+        # for compression, then consumed = False so go to check
         if consumed:
             self.bar.bupdate(data)  # update new or existing bar
             data.backwards()  # remove used bar
