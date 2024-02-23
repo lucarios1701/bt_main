@@ -182,7 +182,6 @@ class LineBuffer(LineSingle):
             start = self.idx + ago - size + 1
             end = self.idx + ago + 1
             return list(islice(self.array, start, end))
-
         return self.array[self.idx + ago - size + 1:self.idx + ago + 1]
 
     def getzeroval(self, idx=0):
@@ -212,7 +211,7 @@ class LineBuffer(LineSingle):
             return list(islice(self.array, idx, idx + size))
         return self.array[idx:idx + size]
 
-    # @tuando: setitem will be use to set data (OHLC) to respectively self.lines
+    # @tuando: setitem will be used to set data (OHLC) to respectively self.lines
     # (of OHLC) in yahoo.py
     def __setitem__(self, ago, value):
         ''' Sets a value at position "ago" and executes any associated bindings

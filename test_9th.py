@@ -43,6 +43,7 @@ for asset in Universe:
     data_feed['low'] = data_feed['close']
     data_feed = data_feed.set_index(data['Date'])
     data_feed.dropna()
+
     backtrader_data_add = bt.feeds.PandasData(
         dataname=data_feed, fromdate=from_date, todate=to_date)
     cerebro.adddata(backtrader_data_add, name=asset)

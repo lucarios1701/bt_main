@@ -278,7 +278,8 @@ class PandasData(feed.DataBase):
         coldtime = self._colmapping['datetime']
 
         if coldtime is None:
-            # @tuando: asigning datetime data to datetime
+            # @tuando: asigning datetime data to datetime. If datetime wsnt aligned
+            # @tuando - index gonna be assigned to datetime
             # standard index in the datetime
             tstamp = self.p.dataname.index[self._idx]
         else:

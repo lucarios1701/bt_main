@@ -87,7 +87,7 @@ class PyFolio(bt.Analyzer):
         dtfcomp = dict(timeframe=self.p.timeframe,
                        compression=self.p.compression)
 
-        # @tuando: guess, when below instances are called when Pyfolio initicated
+        # @tuando: guess, when below instances are called when Pyfolio inidicated
         # then it gonna be added to self._parent in analyzer.py, then will be called
         # with _oncepost in strategy in the loop of reading data and backtest
         self._returns = TimeReturn(**dtfcomp)

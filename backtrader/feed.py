@@ -488,6 +488,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
     def load(self):
         while True:
             # move data pointer forward for new bar
+            # @tuando: because forward was called first in load(), that why if _loadret
+            # @tuando - returns False that means there are no data left, load() need to do backwards
+            # @tuando - again to return the idx in Linbuffer
             self.forward()
             # @tuando - guess: in the first round of loop, _fromstack didnt have
             # bar yet so return False then conitnue the loop
@@ -509,6 +512,8 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                     return _loadret
 
             # Get a reference to current loaded time
+            # @tuando: we can call self.lines because lines have been loaded data
+            # @tuando - in _load()
             dt = self.lines.datetime[0]
 
             # A bar has been loaded, adapt the time
@@ -521,6 +526,9 @@ class AbstractDataBase(with_metaclass(MetaAbstractDataBase,
                 self.lines.datetime[0] = dt = date2num(dtime)  # keep UTC val
 
             # Check standard date from/to filters
+            # @tuando: if dt less than or greater than fromdate and todate, we need to do
+                # backwards because idx have been added 1, then data are not loaded so we need
+                # backwards to minus 1
             if dt < self.fromdate:  # @tuando: if not do backwards, the array will save all data of fed data
                 # discard loaded bar and carry on
                 # forward was ran first then if doesnt meet the startdate, remove that data points

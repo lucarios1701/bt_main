@@ -78,7 +78,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
         swap the columns again arose.
 
     '''
-    lines = ('adjclose',)
+    lines = ('adjclose', )
 
     params = (
         ('reverse', False),
@@ -156,7 +156,7 @@ class YahooFinanceCSVData(feed.CSVDataBase):
             c = adjustedclose
             # If the price goes down, volume must go up and viceversa
             if self.p.adjvolume:
-                v *= adjfactor  # @tuando: think thí adj vol to rebalance the market value
+                v *= adjfactor  # @tuando: think this adj vol to rebalance the market value
 
         if self.p.round:
             decimals = self.p.decimals
@@ -183,9 +183,7 @@ class YahooLegacyCSV(YahooFinanceCSVData):
     discontinued the original service in May-2017
 
     '''
-    params = (
-        ('version', ''),
-    )
+    params = (('version', ''), )
 
 
 class YahooFinanceCSV(feed.CSVFeedBase):

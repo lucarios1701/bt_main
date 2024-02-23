@@ -722,6 +722,7 @@ class BackBroker(bt.BrokerBase):
             # Execution depends on volume filler
             size = self.p.filler(order, price, ago)
             if not order.isbuy():
+                # @tuando: if order is sell, label order size to negative then update negative size to position later
                 size = -size
 
         # Get comminfo object for the data
