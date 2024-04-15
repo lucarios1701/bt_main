@@ -9,12 +9,12 @@ import pandas as pd
 import pyfolio as pf
 
 from backtrader import num2date
+from pypfopt.efficient_frontier import EfficientFrontier
 
 
 # Create Strategy
 class TestDataBricks(bt.Strategy):
     def __init__(self):
-        self.dataclose = self.datas[0].close
         self.t = 0
         self.ticker_list = [
             "FPT",
@@ -28,80 +28,97 @@ class TestDataBricks(bt.Strategy):
             "VPB",
             "VRE",
         ]
+
         self.buy_value = dict.fromkeys(self.ticker_list, 0)
-        self.in_position = list()
+        self.holding = []
+
+        # Add indicator with each data
+        self.sma_dict = dict()
+        for data in self.datas:
+            self.sma_dict["sma_20_" + data._name] = bt.indicators.SMA(data, period=20)
+            self.sma_dict["sma_50_" + data._name] = bt.indicators.SMA(data, period=50)
+            self.sma_dict["sma_200_" + data._name] = bt.indicators.SMA(data, period=200)
 
     def log(self, txt, dt=None):
         """Logging function fot this strategy"""
         dt = dt or self.datas[0].datetime.date(0)
         print("%s, %s" % (dt.isoformat(), txt))
 
+    def MPT_minvol(self, df):
+        daily_returns = df.pct_change(1).dropna(how="all")
+        mu = daily_returns.mean()
+        Sigma = daily_returns.cov() * 252
+        ef = EfficientFrontier(mu, Sigma)
+        weights = ef.min_volatility()
+        clean_weights = ef.clean_weights()
+        return clean_weights
+
     def next(self):
-        close_df = {}
-
+        _to_buy = []
         for data in self.datas:
-            close_df[data._name] = data.close.get(0, 30)  # 15 data points
+            if (
+                (data.close[0] > self.sma_dict["sma_20_" + data._name][0])
+                and (
+                    self.sma_dict["sma_20_" + data._name][0]
+                    > self.sma_dict["sma_50_" + data._name][0]
+                )
+                and (
+                    self.sma_dict["sma_50_" + data._name][0]
+                    > self.sma_dict["sma_200_" + data._name][0]
+                )
+            ):
+                _to_buy.append(data._name)
 
-        _df = pd.DataFrame(close_df)
+        _to_sell_all = list(set(self.holding) - set(_to_buy))
+        _on_hold = list(set(self.holding) - set(_to_sell_all))
 
-        if _df.empty is False:
-            week = _df.pct_change(5).T[29].sort_values().index[0:5].to_list()
-            month = _df.pct_change(24).T[29].sort_values().index[0:5].to_list()
+        print(
+            num2date(self.datas[0].datetime[0]),
+            "====",
+            _to_buy,
+            "=====",
+            _to_sell_all,
+            "====",
+            _on_hold,
+            "====",
+            self.broker.get_value(),
+        )
 
-            target_stock = list(set(week) & set(month))
-
-            if not target_stock:
-                print("No stock to buy! - Close All position")
+        if self.t % 2 == 0:
+            # No stock to buy
+            if not _to_buy:
+                print("No stock to buy! - Close all position")
                 for ticker in self.ticker_list:
-                    self.order_target_value(data=ticker, target=0)
+                    self.order_target_percent(data=ticker, target=0)
             else:
-
                 for ticker in self.buy_value.keys():
-                    if ticker in target_stock:
+                    if ticker in _to_buy:
                         self.buy_value[ticker] = (
-                            1 / len(target_stock) * self.broker.get_value() * 0.95
+                            1 / len(_to_buy) * self.broker.get_value() * 0.95
                         )
                     else:
                         self.buy_value[ticker] = 0
 
-                if self.t % 2 == 0:
                     order_list = dict(
                         sorted(self.buy_value.items(), key=lambda item: item[1])
                     )
 
-                    print("==================================================xxxx")
-                    print(
-                        num2date(self.datas[0].datetime[0]),
-                        "======",
-                        1 / len(target_stock) * self.broker.get_value(),
-                        "=======",
-                        self.broker.get_value(),
-                        "==========",
-                        target_stock,
-                    )
+                _pending = []
+                for stock in order_list.keys():
+                    if stock in self.holding:
+                        self.order_target_value(data=stock, target=order_list[stock])
+                    else:
+                        if order_list[stock] != 0:
+                            _pending.append(stock)
 
-                    print(order_list)
-                    print(self.in_position)
-                    print("==================================================yyyy")
-
-                    _pending = []
-                    for stock in order_list.keys():
-                        if stock in self.in_position:
+                    # make sure pending add to the latest stock
+                    if stock == list(order_list.keys())[-1]:
+                        for pending_stock in _pending:
                             self.order_target_value(
-                                data=stock, target=order_list[stock]
+                                data=pending_stock, target=order_list[pending_stock]
                             )
-                        else:
-                            if order_list[stock] != 0:
-                                _pending.append(stock)
 
-                        if stock == list(order_list.keys())[-1]:
-                            for pending_stock in _pending:
-                                self.order_target_value(
-                                    data=pending_stock, target=order_list[pending_stock]
-                                )
-
-                    self.in_position = {x: y for x, y in order_list.items() if y != 0}
-
+            self.holding = _to_buy
         self.t += 1
 
     def notify_order(self, order):
@@ -145,7 +162,8 @@ if __name__ == "__main__":
 
     # Stickers
     tickers = ("FPT", "HPG", "MBB", "MSN", "MWG", "STB", "TCB", "VHM", "VPB", "VRE")
-    fromdate = datetime.date(2023, 11, 21)
+    fromdate = datetime.date(2019, 1, 1)
+    # fromdate = datetime.date(2023, 11, 21)
     todate = datetime.datetime.now().date()
 
     # Bricks

@@ -16,39 +16,27 @@ class TestDataBricks(bt.Strategy):
     def __init__(self):
         self.t = 0
         self.ticker_list = [
-            "ACB",
-            "BCM",
-            "BID",
-            "BVH",
-            "CTG",
             "FPT",
-            "GAS",
-            "GVR",
-            "HDB",
             "HPG",
             "MBB",
             "MSN",
             "MWG",
-            "PLX",
-            "POW",
-            "SAB",
-            "SHB",
-            "SSB",
-            "SSI",
             "STB",
             "TCB",
-            "TPB",
-            "VCB",
             "VHM",
-            "VIB",
-            "VIC",
-            "VJC",
-            "VNM",
             "VPB",
             "VRE",
         ]
-        self.holding = None
-        self.to_buy = None
+
+        self.buy_value = dict.fromkeys(self.ticker_list, 0)
+        self.holding = []
+
+        # Add indicator with each data
+        self.sma_dict = dict()
+        for data in self.datas:
+            self.sma_dict["sma_20_" + data._name] = bt.indicators.SMA(data, period=20)
+            self.sma_dict["sma_50_" + data._name] = bt.indicators.SMA(data, period=50)
+            self.sma_dict["sma_200_" + data._name] = bt.indicators.SMA(data, period=200)
 
     def log(self, txt, dt=None):
         """Logging function fot this strategy"""
@@ -56,30 +44,71 @@ class TestDataBricks(bt.Strategy):
         print("%s, %s" % (dt.isoformat(), txt))
 
     def next(self):
-        close_df = {}
-
+        _to_buy = []
         for data in self.datas:
-            if data._name == "SHB":
-                print(data.close.get(0, 1))
-            close_df[data._name] = data.close.get(0, 5)  # 5 data points
-
-        print(close_df)
-        _df = pd.DataFrame(close_df)
-
-        if _df.empty is False:
-            if self.t % 5 == 0:
-                self.to_buy = (
-                    _df.pct_change(4).T.sort_values(4, ascending=False).iloc[1].name
+            if (
+                (data.close[0] > self.sma_dict["sma_20_" + data._name][0])
+                and (
+                    self.sma_dict["sma_20_" + data._name][0]
+                    > self.sma_dict["sma_50_" + data._name][0]
                 )
-                if self.holding != self.to_buy:
-                    if self.holding:
-                        self.order_target_value(self.holding, target=0)
+                and (
+                    self.sma_dict["sma_50_" + data._name][0]
+                    > self.sma_dict["sma_200_" + data._name][0]
+                )
+            ):
+                _to_buy.append(data._name)
 
-                    self.order_target_value(
-                        self.to_buy, target=self.broker.get_value() * 0.95
+        _to_sell_all = list(set(self.holding) - set(_to_buy))
+        _on_hold = list(set(self.holding) - set(_to_sell_all))
+
+        print(
+            num2date(self.datas[0].datetime[0]),
+            "====",
+            _to_buy,
+            "=====",
+            _to_sell_all,
+            "====",
+            _on_hold,
+            "====",
+            self.broker.get_value(),
+        )
+
+        if self.t % 2 == 0:
+            # No stock to buy
+            if not _to_buy:
+                print("No stock to buy! - Close all position")
+                for ticker in self.ticker_list:
+                    self.order_target_percent(data=ticker, target=0)
+            else:
+                for ticker in self.buy_value.keys():
+                    if ticker in _to_buy:
+                        self.buy_value[ticker] = (
+                            1 / len(_to_buy) * self.broker.get_value() * 0.95
+                        )
+                    else:
+                        self.buy_value[ticker] = 0
+
+                    order_list = dict(
+                        sorted(self.buy_value.items(), key=lambda item: item[1])
                     )
-                    self.holding = self.to_buy
 
+                _pending = []
+                for stock in order_list.keys():
+                    if stock in self.holding:
+                        self.order_target_value(data=stock, target=order_list[stock])
+                    else:
+                        if order_list[stock] != 0:
+                            _pending.append(stock)
+
+                    # make sure pending add to the latest stock
+                    if stock == list(order_list.keys())[-1]:
+                        for pending_stock in _pending:
+                            self.order_target_value(
+                                data=pending_stock, target=order_list[pending_stock]
+                            )
+
+            self.holding = _to_buy
         self.t += 1
 
     def notify_order(self, order):
@@ -122,39 +151,9 @@ if __name__ == "__main__":
     cerebro.addanalyzer(bt.analyzers.PyFolio)
 
     # Stickers
-    tickers = (
-        "ACB",
-        "BCM",
-        "BID",
-        "BVH",
-        "CTG",
-        "FPT",
-        "GAS",
-        "GVR",
-        "HDB",
-        "HPG",
-        "MBB",
-        "MSN",
-        "MWG",
-        "PLX",
-        "POW",
-        "SAB",
-        "SHB",
-        "SSB",
-        "SSI",
-        "STB",
-        "TCB",
-        "TPB",
-        "VCB",
-        "VHM",
-        "VIB",
-        "VIC",
-        "VJC",
-        "VNM",
-        "VPB",
-        "VRE",
-    )
-    fromdate = datetime.date(2021, 1, 1)
+    tickers = ("FPT", "HPG", "MBB", "MSN", "MWG", "STB", "TCB", "VHM", "VPB", "VRE")
+    fromdate = datetime.date(2023, 1, 1)
+    # fromdate = datetime.date(2023, 11, 21)
     todate = datetime.datetime.now().date()
 
     # Bricks
